@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>980</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>DoPE Controller</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QGroupBox" name="grp_init">
+      <property name="title">
+       <string>Initialisierung Geräte</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_init">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="btn_init_keithley">
+         <property name="text">
+          <string>Init Keithley 2700</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="chk_dmm_live">
+         <property name="text">
+          <string>DMM live</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QCheckBox" name="chk_mess_ub">
+         <property name="text">
+          <string>Mess Ub</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="lbl_sensor_val">
+         <property name="text">
+          <string>Sensor: 10000 N</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="1" column="0">
+        <widget class="QPushButton" name="btn_init_hounsfield">
+         <property name="text">
+          <string>Init Hounsfield</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <layout class="QHBoxLayout" name="layout_conn">
+         <item>
+          <widget class="QLabel" name="lbl_conn_status">
+           <property name="text">
+            <string>Verbindung: getrennt</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="progress_conn">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+           <property name="textVisible">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLabel" name="lbl_kraftdose">
+         <property name="text">
+          <string>Kraftdose: - - -</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="2" column="0">
+        <widget class="QPushButton" name="btn_move_on">
+         <property name="text">
+          <string>Bewegung Ein</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <layout class="QHBoxLayout" name="layout_maxzug">
+         <item>
+          <widget class="QLabel" name="lbl_max_zug">
+           <property name="text">
+            <string>max. Zug [N]:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spin_max_zug">
+           <property name="maximum">
+            <number>200000</number>
+           </property>
+           <property name="value">
+            <number>500</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="2">
+        <layout class="QHBoxLayout" name="layout_maxkraft">
+         <item>
+          <widget class="QLabel" name="lbl_max_kraft">
+           <property name="text">
+            <string>max. Kraft [N]:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spin_max_kraft">
+           <property name="maximum">
+            <number>200000</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="3">
+        <widget class="QCheckBox" name="chk_only_10kn">
+         <property name="text">
+          <string>nur 10 kN-Dose</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="3" column="0">
+        <widget class="QPushButton" name="btn_startpos">
+         <property name="text">
+          <string>def Startposition</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="btn_move_stop">
+         <property name="styleSheet">
+          <string notr="true">color: red; font-weight: bold;</string>
+         </property>
+         <property name="text">
+          <string>Bewegung Halt</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="btn_pos_rest">
+         <property name="text">
+          <string>Gehe Pos Ruhe</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QGroupBox" name="grp_move_mode">
+         <property name="title">
+          <string>Bewegung mit Poti:</string>
+         </property>
+         <layout class="QHBoxLayout" name="layout_move_mode">
+          <item>
+           <widget class="QRadioButton" name="rad_move_aus">
+            <property name="text">
+             <string>aus</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rad_move_speed">
+            <property name="text">
+             <string>Geschwindigkeit</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rad_move_position">
+            <property name="text">
+             <string>Position</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+
+    <item>
+     <widget class="QGroupBox" name="grp_measure">
+      <property name="title">
+       <string>Messung der Sensoren</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_meas">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_sensor">
+         <property name="text">
+          <string>Sensor Nr:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="combo_sensor"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="btn_annehmen">
+         <property name="text">
+          <string>annähern</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QPushButton" name="btn_kontrolle">
+         <property name="text">
+          <string>Kontrolle</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QPushButton" name="btn_meas_start">
+         <property name="text">
+          <string>Messung Start</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QCheckBox" name="chk_datei_left">
+         <property name="text">
+          <string>Datei</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QCheckBox" name="chk_datei_right">
+         <property name="text">
+          <string>Datei</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="7">
+        <widget class="QPushButton" name="btn_meas_stop">
+         <property name="text">
+          <string>Stop</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_time">
+         <property name="text">
+          <string>Zeit:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="edit_time">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="label_pos">
+         <property name="text">
+          <string>Position:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="edit_pos">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QLabel" name="label_kraft">
+         <property name="text">
+          <string>Kraft:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QLineEdit" name="edit_kraft">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="6">
+        <widget class="QLabel" name="label_ub">
+         <property name="text">
+          <string>Ub [mV]:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="7">
+        <widget class="QLineEdit" name="edit_ub">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="chk_startkraft">
+         <property name="text">
+          <string>Startkraft [N]</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="spin_startkraft">
+         <property name="decimals">
+          <number>2</number>
+         </property>
+         <property name="maximum">
+          <double>1000000.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>0.800000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="label_df">
+         <property name="text">
+          <string>dF [N/s]</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QDoubleSpinBox" name="spin_df">
+         <property name="decimals">
+          <number>2</number>
+         </property>
+         <property name="maximum">
+          <double>1000000.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>2.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QLabel" name="label_kraftstufen">
+         <property name="text">
+          <string>Kraftstufen:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="5">
+        <widget class="QLineEdit" name="edit_kraftstufen">
+         <property name="text">
+          <string>0.5,10,15,20,25,20,15,10,5</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="6">
+        <widget class="QLabel" name="label_nennkraft">
+         <property name="text">
+          <string>Nennkraft (FS)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="7">
+        <widget class="QSpinBox" name="spin_nennkraft">
+         <property name="maximum">
+          <number>100000</number>
+         </property>
+         <property name="value">
+          <number>25</number>
+         </property>
+        </widget>
+       </item>
+
+       <item row="3" column="6">
+        <widget class="QLabel" name="label_zyklen">
+         <property name="text">
+          <string>Zyklen:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="7">
+        <widget class="QSpinBox" name="spin_cycles">
+         <property name="maximum">
+          <number>100000</number>
+         </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+
+    <item>
+     <widget class="QPlainTextEdit" name="log">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>150</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui><?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>840</width>
+    <height>640</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="grp_init">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>800</width>
+      <height>170</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Initialisierung Geräte</string>
+    </property>
+    <widget class="QPushButton" name="btn_init_keithley">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>25</y>
+    <width>140</width>
+    <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Init Keithley 2700</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_init_hounsfield">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>55</y>
+    <width>140</width>
+    <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Init Hounsfield</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="chk_dmm_live">
+     <property name="geometry">
+      <rect>
+    <x>660</x>
+    <y>20</y>
+    <width>80</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>DMM live</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="chk_mess_ub">
+     <property name="geometry">
+      <rect>
+    <x>740</x>
+    <y>20</y>
+    <width>70</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Mess Ub</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lbl_sensor_val">
+     <property name="geometry">
+      <rect>
+    <x>520</x>
+    <y>20</y>
+    <width>120</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sensor: 10000 N</string>
+     </property>
+    </widget>
+    <widget class="QProgressBar" name="progress_conn">
+     <property name="geometry">
+      <rect>
+    <x>170</x>
+    <y>30</y>
+    <width>260</width>
+    <height>18</height>
+      </rect>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lbl_conn_status">
+     <property name="geometry">
+      <rect>
+    <x>170</x>
+    <y>10</y>
+    <width>200</width>
+    <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Verbindung: getrennt</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lbl_max_zug">
+     <property name="geometry">
+      <rect>
+    <x>440</x>
+    <y>60</y>
+    <width>80</width>
+    <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>max. Zug [N]</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spin_max_zug">
+     <property name="geometry">
+      <rect>
+    <x>520</x>
+    <y>55</y>
+    <width>80</width>
+    <height>24</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>200000</number>
+     </property>
+     <property name="value">
+      <number>500</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lbl_max_kraft">
+     <property name="geometry">
+      <rect>
+    <x>610</x>
+    <y>60</y>
+    <width>80</width>
+    <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>max. Kraft [N]</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spin_max_kraft">
+     <property name="geometry">
+      <rect>
+    <x>690</x>
+    <y>55</y>
+    <width>80</width>
+    <height>24</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>200000</number>
+     </property>
+     <property name="value">
+      <number>500</number>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_move_on">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>90</y>
+    <width>120</width>
+    <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bewegung Ein</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_move_stop">
+     <property name="geometry">
+      <rect>
+    <x>140</x>
+    <y>90</y>
+    <width>150</width>
+    <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bewegung Halt</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_startpos">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>120</y>
+    <width>120</width>
+    <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>der Startposition</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_pos_rest">
+     <property name="geometry">
+      <rect>
+    <x>140</x>
+    <y>120</y>
+    <width>150</width>
+    <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Gehe Pos Ruhe</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="chk_only_10kn">
+     <property name="geometry">
+      <rect>
+    <x>300</x>
+    <y>120</y>
+    <width>120</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>nur 10 kN Dose</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="grp_move_mode">
+     <property name="geometry">
+      <rect>
+    <x>440</x>
+    <y>90</y>
+    <width>330</width>
+    <height>56</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Bewegung mit Pot:</string>
+     </property>
+     <widget class="QRadioButton" name="rad_move_aus">
+      <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>20</y>
+     <width>60</width>
+     <height>20</height>
+    </rect>
+      </property>
+      <property name="text">
+    <string>aus</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rad_move_speed">
+      <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>20</y>
+     <width>100</width>
+     <height>20</height>
+    </rect>
+      </property>
+      <property name="text">
+    <string>Geschwindigkeit</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rad_move_position">
+      <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>20</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+      </property>
+      <property name="text">
+    <string>Position</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+
+   <widget class="QGroupBox" name="grp_measure">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>190</y>
+      <width>800</width>
+      <height>200</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Messung der Sensoren</string>
+    </property>
+    <widget class="QComboBox" name="combo_sensor">
+     <property name="geometry">
+      <rect>
+    <x>80</x>
+    <y>30</y>
+    <width>120</width>
+    <height>24</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_sensor">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>32</y>
+    <width>70</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sensor Nr:</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_annehmen">
+     <property name="geometry">
+      <rect>
+    <x>220</x>
+    <y>30</y>
+    <width>80</width>
+    <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>annehmen</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_kontrolle">
+     <property name="geometry">
+      <rect>
+    <x>310</x>
+    <y>30</y>
+    <width>80</width>
+    <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kontrolle</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_meas_start">
+     <property name="geometry">
+      <rect>
+    <x>400</x>
+    <y>30
+"
+    <width>110</width>
+    <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Messung Start</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_meas_stop">
+     <property name="geometry">
+      <rect>
+    <x>520</x>
+    <y>30</y>
+    <width>110</width>
+    <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Messung Stop</string>
+     </property>
+    </widget>
+    <widget class="QFormLayout" name="formLayout"/>
+    <widget class="QLabel" name="label_time">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>70</y>
+    <width>50</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Zeit:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="edit_time">
+     <property name="geometry">
+      <rect>
+    <x>60</x>
+    <y>68</y>
+    <width>80</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_pos">
+     <property name="geometry">
+      <rect>
+    <x>150</x>
+    <y>70</y>
+    <width>60</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Position:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="edit_pos">
+     <property name="geometry">
+      <rect>
+    <x>210</x>
+    <y>68
+"
+    <width>80</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_kraft">
+     <property name="geometry">
+      <rect>
+    <x>300</x>
+    <y>70</y>
+    <width>40</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kraft:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="edit_kraft">
+     <property name="geometry">
+      <rect>
+    <x>350</x>
+    <y>68</y>
+    <width>80</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_ub">
+     <property name="geometry">
+      <rect>
+    <x>440</x>
+    <y>70</y>
+    <width>40</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Ub [mV]</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="edit_ub">
+     <property name="geometry">
+      <rect>
+    <x>500</x>
+    <y>68
+"
+    <width>80</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="chk_startkraft">
+     <property name="geometry">
+      <rect>
+    <x>10</x>
+    <y>110
+"
+    <width>80</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Startkraft</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="spin_startkraft">
+     <property name="geometry">
+      <rect>
+    <x>90
+"
+    <y>108
+"
+    <width>70</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>2</number>
+     </property>
+     <property name="maximum">
+      <double>1000000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.800000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_df">
+     <property name="geometry">
+      <rect>
+    <x>170
+"
+    <y>110
+"
+    <width>60</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>dF [N/s]</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="spin_df">
+     <property name="geometry">
+      <rect>
+    <x>230
+"
+    <y>108
+"
+    <width>70</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>2</number>
+     </property>
+     <property name="maximum">
+      <double>1000000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>2.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_cycles">
+     <property name="geometry">
+      <rect>
+    <x>310
+"
+    <y>110
+"
+    <width>40</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Zyklen</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spin_cycles">
+     <property name="geometry">
+      <rect>
+    <x>360
+"
+    <y>108
+"
+    <width>70</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>100000</number>
+     </property>
+     <property name="value">
+      <number>25</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_kraftstufen">
+     <property name="geometry">
+      <rect>
+    <x>440
+"
+    <y>110
+"
+    <width>80</width>
+    <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kraftstufen</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="edit_kraftstufen">
+     <property name="geometry">
+      <rect>
+    <x>520
+"
+    <y>108
+"
+    <width>200</width>
+    <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0.5,10,15,20,25,20,15,10,5</string>
+     </property>
+    </widget>
+   </widget>
+
+   <widget class="QPlainTextEdit" name="log">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>410</y>
+      <width>800</width>
+      <height>200</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
