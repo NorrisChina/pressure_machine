@@ -141,13 +141,13 @@ class DoPeDriver:
             return False
 
         try:
-            actual = 0.0
+            tan = None
             result = self.dll.DoPEPos(
                 self.handle,
                 CTRL_POS,
                 speed,
                 target_pos,
-                actual
+                tan
             )
             return result == 0
         except Exception as e:
@@ -171,13 +171,13 @@ class DoPeDriver:
             return False
 
         try:
-            actual = 0.0
+            tan = None
             result = self.dll.DoPEPos(
                 self.handle,
                 CTRL_LOAD,
                 speed,
                 target_load,
-                actual
+                tan
             )
             return result == 0
         except Exception as e:

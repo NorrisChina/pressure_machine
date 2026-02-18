@@ -49,10 +49,10 @@ DoPERR_NOERROR = 0x0000
 class DoPEData(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
-        ("Time", ctypes.c_double),
-        ("Position", ctypes.c_double),
-        ("Load", ctypes.c_double),
-        ("Extension", ctypes.c_double),
+        ("Time", ctypes.c_double),  # 保留原字段，实际无用
+        ("SampleTime", ctypes.c_double),  # 原Time2，采集时间
+        ("Position", ctypes.c_double),  # 原Load，实际为位移
+        ("Force", ctypes.c_double),
         ("Speed", ctypes.c_double),
         ("Status", ctypes.c_long),
         ("Dummy", ctypes.c_byte * 20)
@@ -112,9 +112,32 @@ if __name__ == "__main__":
         # 1. 停止
         stop(do_ctrl, hdl)
         time.sleep(1)
-        print("\n[等待你手动操作面板/外部控制...]")
+        print("\n[自动测试] 向上移动 10mm/s 2秒...")
+        move_with_speed(do_ctrl, hdl, MOVE_UP, 10)
+        for _ in range(10):
+            do_ctrl.DoPEGetData(hdl, ctypes.byref(data))
+            print_raw_fields(data)
+            time.sleep(0.2)
+        stop(do_ctrl, hdl)
+        time.sleep(1)
+        print("\n[自动测试] 向下移动 10mm/s 2秒...")
+        move_with_speed(do_ctrl, hdl, MOVE_DOWN, 10)
+        for _ in range(10):
+            do_ctrl.DoPEGetData(hdl, ctypes.byref(data))
+            print_raw_fields(data)
+            time.sleep(0.2)
+        stop(do_ctrl, hdl)
+        time.sleep(1)
+        print("\n[自动测试] 定点移动到 20mm...")
+        move_to_position(do_ctrl, hdl, 20, 10)
+        for _ in range(10):
+            do_ctrl.DoPEGetData(hdl, ctypes.byref(data))
+            print_raw_fields(data)
+            time.sleep(0.2)
+        stop(do_ctrl, hdl)
+        print("\n[等待你手动操作面板/外部控制...}")
         # 2. 持续用 DoPEGetData 采集 60 秒，打印所有字段
-        for i in range(300):
+        for i in range(30):
             err = do_ctrl.DoPEGetData(hdl, ctypes.byref(data))
             if err == DoPERR_NOERROR:
                 print_raw_fields(data)

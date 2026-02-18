@@ -10,6 +10,7 @@ import subprocess
 import ctypes
 from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
+import threading
 
 # 多语言文案
 LANG_MAP = {
@@ -41,7 +42,10 @@ LANG_MAP = {
         "log_stop_manual": "紧急停止 - {msg}",
         "log_move_to": "移动到 {pos:.2f} mm (速度: {speed} mm/s) - {msg}",
         "log_home": "回到原点 (速度: {speed} mm/s) - {msg}",
-            "cmd_success": "命令发送成功",
+        "cmd_success": "命令发送成功",
+        "label_time": "时间",
+        "label_position": "位移",
+        "label_force": "力",
     },
     "en": {
         "lang_name": "English",
@@ -72,6 +76,9 @@ LANG_MAP = {
         "log_move_to": "Move to {pos:.2f} mm (speed: {speed} mm/s) - {msg}",
         "log_home": "Home (speed: {speed} mm/s) - {msg}",
         "cmd_success": "Command sent",
+        "label_time": "Time",
+        "label_position": "Position",
+        "label_force": "Force",
     },
     "de": {
         "lang_name": "Deutsch",
@@ -102,6 +109,9 @@ LANG_MAP = {
         "log_move_to": "Fahre zu {pos:.2f} mm (Geschw.: {speed} mm/s) - {msg}",
         "log_home": "Referenzfahrt (Geschw.: {speed} mm/s) - {msg}",
         "cmd_success": "Befehl gesendet",
+        "label_time": "Zeit",
+        "label_position": "Position",
+        "label_force": "Kraft",
     },
 }
 
@@ -424,7 +434,18 @@ class DopeControlPanel(QtWidgets.QWidget):
         left_col.addLayout(control_layout)
         left_col.addStretch()
 
-        # 右侧日志区域（更大）
+        # 右侧参数显示区 + 日志区域
+        param_group = QtWidgets.QGroupBox("参数")
+        param_layout = QtWidgets.QGridLayout()
+        self.lbl_time = QtWidgets.QLabel(f"{self._t('label_time')}: --")
+        self.lbl_position = QtWidgets.QLabel(f"{self._t('label_position')}: --")
+        self.lbl_force = QtWidgets.QLabel(f"{self._t('label_force')}: --")
+        param_layout.addWidget(self.lbl_time, 0, 0)
+        param_layout.addWidget(self.lbl_position, 1, 0)
+        param_layout.addWidget(self.lbl_force, 2, 0)
+        param_group.setLayout(param_layout)
+        right_col.addWidget(param_group)
+
         self.log_label = QtWidgets.QLabel(self._t("log"))
         self.log_label.setStyleSheet("font-weight: bold;")
         self.log_text = QtWidgets.QTextEdit()
@@ -438,6 +459,35 @@ class DopeControlPanel(QtWidgets.QWidget):
 
         self.setLayout(main_layout)
         self.apply_language()
+        # 启动数据刷新线程
+        self._running = True
+        self._thread = threading.Thread(target=self.update_data_loop, daemon=True)
+        self._thread.start()
+
+    def update_data_loop(self):
+        import time
+        class DATA(ctypes.Structure):
+            _fields_ = [("time", ctypes.c_double), ("position", ctypes.c_double), ("force", ctypes.c_double)]
+        data = DATA()
+        while self._running:
+            if self.controller.connected and hasattr(self.controller.dope, 'DoPEGetData'):
+                try:
+                    self.controller.dope.DoPEGetData.argtypes = [ctypes.c_ulong, ctypes.POINTER(DATA)]
+                    self.controller.dope.DoPEGetData.restype = ctypes.c_ulong
+                    ret = self.controller.dope.DoPEGetData(self.controller.hdl, ctypes.byref(data))
+                    if ret == self.controller.DoPERR_NOERROR:
+                        self.lbl_time.setText(f"{self._t('label_time')}: {data.time:.2f}")
+                        self.lbl_position.setText(f"{self._t('label_position')}: {data.position:.2f}")
+                        self.lbl_force.setText(f"{self._t('label_force')}: {data.force:.2f}")
+                    else:
+                        self.lbl_time.setText(f"{self._t('label_time')}: --")
+                        self.lbl_position.setText(f"{self._t('label_position')}: --")
+                        self.lbl_force.setText(f"{self._t('label_force')}: --")
+                except Exception:
+                    self.lbl_time.setText(f"{self._t('label_time')}: --")
+                    self.lbl_position.setText(f"{self._t('label_position')}: --")
+                    self.lbl_force.setText(f"{self._t('label_force')}: --")
+            time.sleep(0.2)
 
     def on_disconnect(self):
         """断开按钮：安全断开设备"""
@@ -508,8 +558,8 @@ class DopeControlPanel(QtWidgets.QWidget):
     
     def closeEvent(self, event):
         """关闭窗口前安全断开设备"""
-        self.controller.disconnect()
-        event.accept()
+        self._running = False
+        super().closeEvent(event)
 
 
 def main():

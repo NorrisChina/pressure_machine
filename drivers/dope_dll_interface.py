@@ -80,6 +80,7 @@ SENSOR_DP = 3  # DigiPoti (版本 2.73+ 别名)
 # 控制命令
 CTRL_POS = 0    # 位置控制
 CTRL_LOAD = 1   # 力控制
+CTRL_EXTENSION = 2  # 延伸控制
 
 
 # ============================================================================
@@ -185,9 +186,21 @@ class DoPEDLL:
             c_uint16,              # Control (CTRL_POS/CTRL_LOAD)
             c_double,              # Speed
             c_double,              # Target
-            POINTER(c_double)      # Actual
+            POINTER(c_uint16)      # lpusTAN (optional)
         ]
         self.DoPEPos.restype = c_uint32
+
+        # 连续移动 (速度控制)
+        self.DoPEFMove = getattr(self.dll, "DoPEFMove", None)
+        if self.DoPEFMove is not None:
+            self.DoPEFMove.argtypes = [
+                c_void_p,          # DHandle
+                c_uint16,          # Direction (MOVE_UP/MOVE_DOWN/MOVE_HALT)
+                c_uint16,          # MoveCtrl (CTRL_POS/CTRL_LOAD/CTRL_EXTENSION)
+                c_double,          # Speed
+                POINTER(c_uint16)  # lpusTAN (optional)
+            ]
+            self.DoPEFMove.restype = c_uint32
 
         # 设置时间
         self.DoPESetTime = self.dll.DoPESetTime
