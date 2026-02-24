@@ -2,7 +2,47 @@
 # -*- coding: utf-8 -*-
 """DoPE control panel (new).
 
-Based on the getdata_panel structure and kept compatible with the main UI features.
+This file implements a PyQt5-based control panel for a DoPE controller via
+`drivers/DoPE.dll` using `ctypes`.
+
+High-level goals
+----------------
+- Provide a small, self-contained UI for:
+    - live status (sample time, position, force)
+    - press-and-hold jogging (up/down)
+    - target position cycles with CSV recording
+    - optional Keithley 2700 resistance logging (best-effort)
+    - DigiPoti manual control (speed/position) with a "safe start" strategy
+
+Key safety and reliability notes
+-------------------------------
+- The vendor DLL is treated as *not thread-safe*. All DLL calls are serialized
+    with a re-entrant lock (`self._dll_lock`).
+- The DLL is 32-bit. If this script runs under 64-bit Python, it will try to
+    re-launch itself with `./.venv32/Scripts/python.exe` and exit.
+- `faulthandler` is enabled to capture fatal crashes (e.g. access violations)
+    caused by bad struct layouts or DLL bugs. Logs go to
+    `dope_ui_new_faulthandler.log`.
+- Units are easy to mix up:
+    - DoPE position values are treated as meters (m) as returned by the DLL.
+    - UI displays millimeters (mm) and micrometers (µm) depending on the widget.
+    - DoPE speeds are passed as meters/second (m/s) to the DLL.
+
+Operating model
+---------------
+- UI thread:
+    - owns all widgets
+    - processes samples via a Qt signal (`sig_data`) and updates labels
+    - runs the cycle-state machine (`_cycle_on_sample`) on each sample
+- Background thread (`update_data_loop`):
+    - polls `DoPEGetData` at a low rate by default
+    - polls faster while cycles are active
+    - enforces software force limits and handles DigiPoti "arming" logic
+
+Handover
+--------
+See the handover document generated for this component for setup, workflows,
+and troubleshooting guidance.
 """
 import sys
 import os
@@ -34,6 +74,15 @@ if sys.maxsize > 2**32:
         raise SystemExit(0)
 
 class DoPEData(ctypes.Structure):
+    """Raw sample structure returned by `DoPEGetData`.
+
+    Important:
+    - `_pack_ = 1` is required to match the vendor ABI.
+    - This layout is based on the working manual DigiPoti scripts in this repo
+      and has been verified on the target device (Position/Force/SensorD).
+    - Do **not** reorder or change field types unless you also validate against
+      the actual DLL/firmware; a mismatch can cause wrong readings or crashes.
+    """
     _pack_ = 1
     _fields_ = [
            # NOTE: This layout matches the working manual DigiPoti scripts in this repo.
@@ -60,6 +109,15 @@ class DoPEData(ctypes.Structure):
 
 
 class DoPESumSenInfo(ctypes.Structure):
+    """Sensor metadata returned by `DoPERdSensorInfo`.
+
+    Used primarily for:
+    - scanning candidate force channels (by UpperLimit)
+    - reading configured limits for the X21B autofix logic
+
+    The DLL call is bound as `void*` and then decoded from a raw buffer to
+    reduce the chance of ctypes ABI mismatches crashing the process.
+    """
     _pack_ = 1
     _fields_ = [
         ("Connector", ctypes.c_uint16),
@@ -77,6 +135,28 @@ class DoPESumSenInfo(ctypes.Structure):
     ]
 
 class DopeUINew(QtWidgets.QWidget):
+    """Main Qt widget implementing the DoPE control panel.
+
+    Signals
+    -------
+    sig_log: str
+        Thread-safe logging. Background threads emit log lines via this signal.
+    sig_data: object, object, object
+        Emits `(sample_time_s, position_abs_m, force_value)` and is handled on
+        the UI thread.
+
+    Concurrency model
+    -----------------
+    - The DoPE vendor DLL is assumed not to be thread-safe. All access is
+      serialized via `self._dll_lock`.
+    - A background thread polls the controller and emits `sig_data`.
+    - All widget updates must happen on the UI thread.
+
+    Safety
+    ------
+    - `Stop` halts motion, aborts cycles, and exits DigiPoti modes.
+    - Software force limits can auto-stop motion (Halt + Move=HALT).
+    """
     sig_log = QtCore.pyqtSignal(str)
     sig_data = QtCore.pyqtSignal(object, object, object)  # sample_time, position, force
 
@@ -178,6 +258,21 @@ class DopeUINew(QtWidgets.QWidget):
             self._thread = None
 
     def _update_labels(self, dt_s, position, load):
+        """Update UI labels from the latest sample.
+
+        This method is executed on the UI thread because it is connected to the
+        `sig_data` Qt signal.
+
+        Parameters
+        ----------
+        dt_s:
+            SampleTime as reported by DoPE (seconds). Can be None on errors.
+        position:
+            Absolute position from DoPE (meters). Displayed as relative mm.
+        load:
+            Force value (engineering units depend on selected sensor). The UI
+            treats it as a float and prints it; it may be N for typical setups.
+        """
         try:
             if dt_s is None:
                 self.lbl_sampletime.setText("SampleTime: --")
@@ -216,6 +311,15 @@ class DopeUINew(QtWidgets.QWidget):
             pass
 
     def init_ui(self):
+        """Build the UI layout and bind all button callbacks.
+
+        The panel is organized into:
+        - Step1 Setup: select range and force limits
+        - Press & Hold Move: jogging at a given speed
+        - Target Move: cycle runner (target <-> origin) with CSV logging
+        - Manual Move: DigiPoti speed/position modes
+        - Status + Log: live values and persistent logging
+        """
         main_layout = QtWidgets.QHBoxLayout()
         left_col = QtWidgets.QVBoxLayout()
         right_col = QtWidgets.QVBoxLayout()
@@ -393,7 +497,18 @@ class DopeUINew(QtWidgets.QWidget):
         self.setLayout(main_layout)
 
     def _scan_force_sensor_candidates(self):
-        """Return list of sensor candidates as (sn, upper, unit, conn, state)."""
+        """Scan sensor channels and return basic metadata.
+
+        Returns
+        -------
+        list[tuple[int, float, int, int, int]]
+            Tuples of `(sensor_no, upper_limit, unit, connector, state)`.
+
+        Notes
+        -----
+        - This is a lightweight best-effort call used for range selection.
+        - Any sensor info call failure simply results in fewer candidates.
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             return []
         candidates = []
@@ -408,11 +523,29 @@ class DopeUINew(QtWidgets.QWidget):
         return candidates
 
     def apply_range_selection(self):
-        """Apply range selection (100N/1000N/10kN).
+        """Apply the selected range and pick a force channel for supervision.
 
-        - 10kN: switches setup via DoPESelSetup (SETUP_10KN)
-        - 100N/1000N: selects best matching force sensor channel for limit supervision
-        """
+                Behavior
+                --------
+                - "10 kN":
+                    - switches controller setup via `DoPESelSetup(SETUP_10KN)`
+                    - then re-enables data transmit
+                - "100 N" / "1000 N":
+                    - *does not* switch controller setup
+                    - chooses a force-like sensor channel based on closest `UpperLimit`
+
+                Side effects
+                ------------
+                - Updates `self._range_selection` and the UI label.
+                - Updates `self._force_sensor_no` so sampling + force limits can use the
+                    selected channel.
+
+                Rationale
+                ---------
+                Many DoPE setups expose multiple sensor channels. This UI chooses the
+                channel that best matches the intended range so that software limit
+                supervision is applied to the right measurement.
+                """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[setup] Not connected")
             return
@@ -507,6 +640,10 @@ class DopeUINew(QtWidgets.QWidget):
         self.lbl_range.setText(f"Range: {text}")
 
     def log(self, message):
+        """Append a timestamped log line to the UI and to a local file.
+
+        Log file location: `dope_ui_new.log` next to this script.
+        """
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_line = f"[{timestamp}] {message}"
@@ -522,6 +659,11 @@ class DopeUINew(QtWidgets.QWidget):
             pass
 
     def _log_async(self, message: str):
+        """Thread-safe logging helper.
+
+        Use this from background threads. It emits `sig_log` which is connected
+        to `log()` on the UI thread.
+        """
         # Keep name for backward compatibility inside this file.
         try:
             self.sig_log.emit(message)
@@ -529,6 +671,30 @@ class DopeUINew(QtWidgets.QWidget):
             pass
 
     def init_dope(self) -> bool:
+        """Load the DLL and initialize the controller connection.
+
+        Sequence (best-effort)
+        ----------------------
+        1) Load `drivers/DoPE.dll`.
+        2) `DoPEOpenLink` to open the serial link (parameters are project
+           specific; currently hard-coded).
+        3) `DoPESetNotification` (used here as a standard init step).
+        4) `DoPESelSetup(1)` select a default setup on connect.
+        5) `DoPEOn` start controller.
+        6) `DoPECtrlTestValues(0)` and `DoPETransmitData(Enable=1)` to enable
+           live streaming.
+        7) Bind ctypes signatures for the subset of APIs used by this UI.
+
+        Return
+        ------
+        bool
+            True on successful connect + setup selection.
+
+        Notes
+        -----
+        - All calls are wrapped with `self._dll_lock`.
+        - Several APIs are optional; we guard with `hasattr`/`getattr`.
+        """
         self.log("[init] Loading DLL...")
         self.do_ctrl = ctypes.WinDLL(str(DLL_PATH))
         self.hdl = ctypes.c_ulong(0)
@@ -751,6 +917,20 @@ class DopeUINew(QtWidgets.QWidget):
         return True
 
     def _value_for_sensor_no(self, data: DoPEData, sensor_no: int) -> float | None:
+        """Map a "sensor number" to a numeric value within `DoPEData`.
+
+        This mapping is project-specific and matches how other scripts in this
+        repo interpret the sample buffer.
+
+        Mapping
+        -------
+        - 0 -> Position
+        - 1 -> Force
+        - 3 -> SensorD (DigiPoti feedback)
+        - 4..10 -> Sensor4..Sensor10
+
+        Returns None if the sensor number is unsupported.
+        """
         sensor_no = int(sensor_no)
         if sensor_no == 0:
             return float(data.Position)
@@ -763,6 +943,13 @@ class DopeUINew(QtWidgets.QWidget):
         return None
 
     def _read_one_sample(self) -> DoPEData | None:
+        """Read a single sample using `DoPEGetData`.
+
+        Implementation detail:
+        - Reads into a raw 1024-byte buffer and then slices into `DoPEData`.
+          This reduces the chance of crashes if the DLL writes a larger struct
+          than expected.
+        """
         buf = ctypes.create_string_buffer(1024)
         with self._dll_lock:
             err = int(self.do_ctrl.DoPEGetData(self.hdl, ctypes.byref(buf)))
@@ -774,6 +961,7 @@ class DopeUINew(QtWidgets.QWidget):
             return None
 
     def _read_avg_sensor(self, sensor_no: int, n: int = 10, sleep_s: float = 0.05) -> float | None:
+        """Read `n` samples and return the average value for a given sensor."""
         vals = []
         for _ in range(max(1, int(n))):
             s = self._read_one_sample()
@@ -789,6 +977,7 @@ class DopeUINew(QtWidgets.QWidget):
         return sum(vals) / len(vals)
 
     def _get_basic_tare(self, sensor_no: int) -> float | None:
+        """Get the persistent BasicTare value for a sensor (if supported)."""
         if not hasattr(self.do_ctrl, "DoPEGetBasicTare"):
             return None
         val = ctypes.c_double(0.0)
@@ -799,6 +988,7 @@ class DopeUINew(QtWidgets.QWidget):
         return float(val.value)
 
     def _set_basic_tare_clear(self, sensor_no: int) -> int:
+        """Clear persistent BasicTare compensation (if supported)."""
         if not hasattr(self.do_ctrl, "DoPESetBasicTare"):
             return 0xFFFF
         # SUBTRACT mode with BasicTare=0 clears persistent compensation.
@@ -808,6 +998,7 @@ class DopeUINew(QtWidgets.QWidget):
         return err
 
     def _set_basic_tare_desired_zero(self, sensor_no: int) -> int:
+        """Set persistent BasicTare so that the measured value becomes ~0."""
         if not hasattr(self.do_ctrl, "DoPESetBasicTare"):
             return 0xFFFF
         # SET mode: pass desired measuring value (0) and controller computes the needed offset.
@@ -817,6 +1008,22 @@ class DopeUINew(QtWidgets.QWidget):
         return err
 
     def _autofix_x21b_basic_tare(self):
+        """Auto-fix X21B baseline out-of-range via persistent BasicTare.
+
+                Context
+                -------
+                On some rigs the X21B (sensor 4) baseline can start outside the
+                configured upper/lower limits. Downstream tools (e.g. LabMaster) may
+                then immediately report a system message / limit error.
+
+                Strategy
+                --------
+                - If BasicTare is currently unset (0), read a baseline average.
+                - If baseline is outside limits, apply `DoPESetBasicTare(SET desired=0)`
+                    so the controller persists an offset.
+
+                This is best-effort and logs what it did.
+                """
         sensor_no = 4  # X21B 1kN force channel
         err, info = self._rd_sensor_info(sensor_no)
         if err != 0x0000 or info is None:
@@ -847,6 +1054,21 @@ class DopeUINew(QtWidgets.QWidget):
         self.log(f"[autofix] DoPESetBasicTare(sensor={sensor_no}, mode=SET, desired=0) -> 0x{err_set:04x}")
 
     def update_data_loop(self):
+        """Background polling loop for DoPE samples.
+
+                Responsibilities
+                ----------------
+                - Poll `DoPEGetData` and emit `sig_data` (UI update).
+                - Apply software force limits (auto-stop) when enabled.
+                - Maintain SensorD history for DigiPoti safe activation.
+                - Increase polling rate while cycles are active.
+
+                Important constraints
+                ---------------------
+                - Avoid polling too fast. Over-aggressive polling can destabilize some
+                    vendor DLLs (including potential crashes).
+                - All DLL calls are serialized via `self._dll_lock`.
+                """
         # Use a large buffer to protect against DLL writing a bigger struct than we expect.
         buf = ctypes.create_string_buffer(1024)
         while self._running:
@@ -1030,6 +1252,10 @@ class DopeUINew(QtWidgets.QWidget):
                 time.sleep(0.2)
 
     def move_up(self):
+        """Jog up while the button is pressed.
+
+        The UI speed input is in mm/s, converted to m/s for `DoPEFMove`.
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[move_up] Not connected")
             return
@@ -1042,6 +1268,10 @@ class DopeUINew(QtWidgets.QWidget):
         self.log(f"Moving up (speed: {speed} mm/s)")
 
     def move_down(self):
+        """Jog down while the button is pressed.
+
+        The UI speed input is in mm/s, converted to m/s for `DoPEFMove`.
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[move_down] Not connected")
             return
@@ -1054,6 +1284,14 @@ class DopeUINew(QtWidgets.QWidget):
         self.log(f"Moving down (speed: {speed} mm/s)")
 
     def stop_move(self):
+        """Stop any motion and exit any external control modes.
+
+        This is the "big red button" behavior:
+        - cancels pending DigiPoti activation and clears its state machine
+        - aborts any running cycle program and closes CSV logs
+        - issues `DoPEHalt` (if available) to exit external modes
+        - issues `DoPEFMove(HALT)` as a final stop command
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[stop_move] Not connected")
             return
@@ -1096,6 +1334,7 @@ class DopeUINew(QtWidgets.QWidget):
         self.log("Stopped")
 
     def _open_cycle_log(self) -> None:
+        """Open a CSV file to record target cycle data."""
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_dir = Path(__file__).parent / "temp"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -1115,6 +1354,7 @@ class DopeUINew(QtWidgets.QWidget):
         self._cycle_log_writer.writerow(header)
 
     def _close_cycle_log(self) -> None:
+        """Close the current cycle CSV file (if any)."""
         fp = self._cycle_log_fp
         self._cycle_log_fp = None
         self._cycle_log_writer = None
@@ -1128,6 +1368,14 @@ class DopeUINew(QtWidgets.QWidget):
             pass
 
     def _cycle_send_destination_rel_mm(self, dest_rel_mm: float) -> int:
+        """Send a target destination relative to the current origin (in mm).
+
+        Converts:
+        - relative mm -> absolute meters
+        - speed mm/s -> m/s
+
+        Returns a DoPE error code (0x0000 on success).
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             return 0xFFFF
         if not getattr(self.do_ctrl, 'DoPEPos', None):
@@ -1140,6 +1388,16 @@ class DopeUINew(QtWidgets.QWidget):
             return int(self.do_ctrl.DoPEPos(self.hdl, self.CTRL_POS, speed_m_s, float(dest_abs_m), None))
 
     def start_target_cycles(self):
+        """Start the target <-> origin cycle program.
+
+        The UI inputs are in µm and µm/s, but the internal cycle state machine
+        uses mm/mm/s for readability.
+
+        Side effects
+        ------------
+        - Opens a CSV log under `temp/`.
+        - Optionally starts Keithley logging (if enabled and channels selected).
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[cycles] Not connected")
             return
@@ -1199,6 +1457,7 @@ class DopeUINew(QtWidgets.QWidget):
         self.log(f"[cycles] Move to target => 0x{err:04x}")
 
     def _stop_target_cycles(self, aborted: bool) -> None:
+        """Stop cycles, stop Keithley logging, and close CSV logs."""
         if not self._cycle_active:
             return
 
@@ -1232,6 +1491,11 @@ class DopeUINew(QtWidgets.QWidget):
                     self.log(f"[cycles] Completed. CSV saved: {log_path}")
 
     def _cycle_on_sample(self, position_abs_m, force_n) -> None:
+        """Cycle state machine executed on each valid sample (UI thread).
+
+        It logs one CSV row per sample and advances phases when the position is
+        within a tolerance band for a small number of consecutive samples.
+        """
         if not self._cycle_active:
             return
         if position_abs_m is None or force_n is None:
@@ -1318,6 +1582,7 @@ class DopeUINew(QtWidgets.QWidget):
         return out
 
     def _get_keithley_latest_snapshot(self) -> dict:
+        """Return a copy of the latest resistance values (thread-safe)."""
         with self._kei_latest_lock:
             return dict(self._kei_latest)
 
@@ -1422,6 +1687,7 @@ class DopeUINew(QtWidgets.QWidget):
         self.log(f"[keithley] In-process logging started: resource={resource!r}, channels={channels}, freq={freq_hz:.2f} Hz")
 
     def _stop_keithley_logger(self, preserve_channels: bool = False) -> None:
+        """Stop Keithley logging (subprocess or in-process) and close CSV."""
         # Stop subprocess helper (preferred mode)
         proc = self._kei_proc
         self._kei_proc = None
@@ -1484,6 +1750,7 @@ class DopeUINew(QtWidgets.QWidget):
             pass
 
     def _open_keithley_log(self, channels: list[int]) -> None:
+        """Open Keithley CSV log file under `temp/`."""
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_dir = Path(__file__).parent / "temp"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -1496,6 +1763,7 @@ class DopeUINew(QtWidgets.QWidget):
         self._kei_log_writer.writerow(header)
 
     def _close_keithley_log(self) -> None:
+        """Close the Keithley CSV log file (if open)."""
         fp = self._kei_log_fp
         self._kei_log_fp = None
         self._kei_log_writer = None
@@ -1733,6 +2001,7 @@ class DopeUINew(QtWidgets.QWidget):
         return None
 
     def _digipoti_max_speed_m_s(self) -> float:
+        """Return DigiPoti max speed as m/s derived from the UI jog speed."""
         # Reuse the UI speed input as DigiPoti MaxSpeed limit (mm/s -> m/s)
         try:
             speed_mm_s = float(self.speed_input.value())
@@ -1741,7 +2010,21 @@ class DopeUINew(QtWidgets.QWidget):
         return speed_mm_s / 1000.0
 
     def start_digipoti_speed(self):
-        """Manual speed: knob controls speed (often Mode=5 EXT_SPEED_UP_DOWN)."""
+        """Enable DigiPoti *speed* mode with a safe two-stage activation.
+
+        Why the two-stage activation?
+        ----------------------------
+        On some rigs, calling `DoPEFDPoti` for speed mode can cause an immediate
+        movement if the knob is not exactly at its baseline (or if noise looks
+        like a movement). To reduce risk, we:
+        1) Stop any motion and clear external modes (`stop_move`).
+        2) Observe SensorD until the knob is centered & stable for ~0.25s.
+        3) Arm speed mode with `MaxSpeed=0` (guarantee no initial speed).
+        4) After the *first intentional* knob movement beyond `DxTrigger`,
+           re-issue `DoPEFDPoti` with the requested `MaxSpeed`.
+
+        The arming/activation logic is implemented in `update_data_loop`.
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[digipoti_speed] Not connected")
             return
@@ -1780,7 +2063,15 @@ class DopeUINew(QtWidgets.QWidget):
         )
 
     def start_digipoti_position(self):
-        """Manual position: knob controls target position (Mode=0 EXT_POSITION; fallback Mode=4 EXT_POS_UP_DOWN)."""
+        """Enable DigiPoti *position* mode.
+
+                Notes
+                -----
+                - This mode is usually safer than speed mode because it does not
+                    immediately command a velocity.
+                - We try Mode=0 (EXT_POSITION) first and fall back to Mode=4
+                    (EXT_POS_UP_DOWN) because device configurations vary.
+                """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             self.log("[digipoti_pos] Not connected")
             return
@@ -1813,6 +2104,7 @@ class DopeUINew(QtWidgets.QWidget):
         self.log("❌ Manual position start failed")
 
     def move_to_position(self):
+        """Backward-compat alias: historically a single move; now runs cycles."""
         # Backward-compat: keep the method name, but run the cycle program.
         self.start_target_cycles()
 
@@ -1825,6 +2117,14 @@ class DopeUINew(QtWidgets.QWidget):
         self.log(f"[origin] Origin set: zero_abs={self._pos_zero_abs:.6f} (display Position=0)")
 
     def _rd_sensor_info(self, sensor_no: int) -> tuple[int, DoPESumSenInfo | None]:
+        """Read sensor metadata for `sensor_no`.
+
+        Returns
+        -------
+        (err_code, info)
+            - `err_code` is a DoPE error code (0x0000 on success).
+            - `info` is a decoded `DoPESumSenInfo` on success.
+        """
         if not getattr(self, 'hdl', None) or self.hdl.value == 0:
             return 0xFFFF, None
         if not hasattr(self.do_ctrl, 'DoPERdSensorInfo'):
@@ -1920,6 +2220,14 @@ class DopeUINew(QtWidgets.QWidget):
             pass
 
     def disconnect(self):
+        """Disconnect from the controller and stop background activity.
+
+        Order of operations
+        -------------------
+        - Stop motion / abort cycles first (`stop_move`).
+        - Stop the polling thread (`self._running = False`).
+        - Issue `DoPEHalt` (best-effort) and `DoPECloseLink`.
+        """
         # Stop any motion/cycle program first
         try:
             self.stop_move()
@@ -1971,6 +2279,7 @@ class DopeUINew(QtWidgets.QWidget):
         self.setEnabled(False)
 
     def closeEvent(self, event):
+        """Qt close hook: stop threads/motion before exiting the UI."""
         self._running = False
         try:
             if getattr(self, '_thread', None) is not None:

@@ -1,0 +1,112 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+DoPENet_VBDemo
+</name>
+</assembly>
+<members>
+<member name="T:DoPENet_VBDemo.My.Resources.Resources">
+<summary>
+  Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+</summary>
+</member>
+<member name="P:DoPENet_VBDemo.My.Resources.Resources.ResourceManager">
+<summary>
+  Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+</summary>
+</member>
+<member name="P:DoPENet_VBDemo.My.Resources.Resources.Culture">
+<summary>
+  Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+  Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+</summary>
+</member>
+<member name="T:DoPENet_VBDemo.MainForm">
+ <summary>
+ Demo-application for the DoPE .NET library.
+ </summary>
+</member>
+<member name="F:DoPENet_VBDemo.MainForm.MyEdc">
+ <summary>
+ Represents one EDC.
+ This object is needed to perform DoPE tasks.
+ (Similar to the DoPE-handle in C++.)
+ </summary>
+</member>
+<member name="F:DoPENet_VBDemo.MainForm.MyTan">
+ <summary>
+ TAN number assigned to a DoPE command.
+ (To get informed when this task has been performed.)
+ </summary>
+</member>
+<member name="F:DoPENet_VBDemo.MainForm.CommandFailedString">
+ <summary>
+ Just an error constant string which is used
+ when the EDC could not be initialized correctly.
+ </summary>
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.MainForm_Shown(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>FormShown initialzes GUI and starts communication with EDC</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.ConnectToEdc">
+ ----------------------------------------------------------------------
+ <summary>Connect to EDC</summary>
+ ----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.DisplayError(Doli.DoPE.DoPE.ERR,System.String)">
+----------------------------------------------------------------------
+ <summary>
+ Formates and displays DoPE-errors.
+ </summary>
+ <param name="error">the dope error to display</param>
+ <param name="Text">additional text to display</param>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.Display(System.String)">
+----------------------------------------------------------------------
+ <summary>Display debug text</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiOn_Click(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>Activates the EDC's drive.</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiOff_Click(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>Deactivates the EDC's drive.</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiUp_Click(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>Sends a move-command with direction "up" to the EDC.</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiHalt_Click(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>Sends a halt-command to the EDC.</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiDown_Click(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>Sends a move-command with direction "down" to the EDC.</summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiPos_Click(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>
+ Sends a move command to the EDC. The command-parameters
+ are copied from the user-interface.
+ </summary>
+----------------------------------------------------------------------
+</member>
+<member name="M:DoPENet_VBDemo.MainForm.guiControl_SelectedIndexChanged(System.Object,System.EventArgs)">
+----------------------------------------------------------------------
+ <summary>Sets the correct units depending on the selected control-mode.</summary>
+----------------------------------------------------------------------
+</member>
+</members>
+</doc>

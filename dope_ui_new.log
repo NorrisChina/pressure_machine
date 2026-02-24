@@ -3771,3 +3771,203 @@
 [2026-02-13 17:50:09] [stop_move] DoPEFMove STOP
 [2026-02-13 17:50:09] [stop_move] DoPEFMove returned: 0x0000
 [2026-02-13 17:50:09] Stopped
+[2026-02-24 09:12:24] [init] Loading DLL...
+[2026-02-24 09:12:24] [init] Calling DoPEOpenLink...
+[2026-02-24 09:12:25] [init] DoPEOpenLink returned: 0x0000, hdl=96362424
+[2026-02-24 09:12:25] Connected
+[2026-02-24 09:12:25] [init] Calling DoPESetNotification...
+[2026-02-24 09:12:25] [init] DoPESetNotification returned: 0x0000
+[2026-02-24 09:12:25] [init] Calling DoPESelSetup...
+[2026-02-24 09:12:32] [init] DoPESelSetup returned: 0x0006, tan_first=3729, tan_last=3729
+[2026-02-24 09:12:32] SelSetup failed: 0x0006
+[2026-02-24 09:14:06] [init] Loading DLL...
+[2026-02-24 09:14:06] [init] Calling DoPEOpenLink...
+[2026-02-24 09:14:07] [init] DoPEOpenLink returned: 0x0000, hdl=94551920
+[2026-02-24 09:14:07] Connected
+[2026-02-24 09:14:07] [init] Calling DoPESetNotification...
+[2026-02-24 09:14:07] [init] DoPESetNotification returned: 0x0000
+[2026-02-24 09:14:07] [init] Calling DoPESelSetup...
+[2026-02-24 09:14:14] [init] DoPESelSetup returned: 0x0006, tan_first=7851, tan_last=7851
+[2026-02-24 09:14:14] SelSetup failed: 0x0006
+[2026-02-24 09:14:22] [move_up] Not connected
+[2026-02-24 09:14:22] [stop_move] Not connected
+[2026-02-24 09:14:22] [move_up] Not connected
+[2026-02-24 09:14:23] [stop_move] Not connected
+[2026-02-24 09:15:13] [stop_move] Not connected
+[2026-02-24 09:16:35] [init] Loading DLL...
+[2026-02-24 09:16:35] [init] Calling DoPEOpenLink...
+[2026-02-24 09:16:36] [init] DoPEOpenLink returned: 0x0000, hdl=98266968
+[2026-02-24 09:16:36] Connected
+[2026-02-24 09:16:36] [init] Calling DoPESetNotification...
+[2026-02-24 09:16:36] [init] DoPESetNotification returned: 0x0000
+[2026-02-24 09:16:36] [init] Calling DoPESelSetup...
+[2026-02-24 09:16:54] [init] DoPESelSetup returned: 0x0000, tan_first=23821, tan_last=23821
+[2026-02-24 09:16:54] [init] Calling DoPEOn...
+[2026-02-24 09:16:54] [init] DoPEOn returned: 0x0000
+[2026-02-24 09:16:54] [init] Calling DoPECtrlTestValues...
+[2026-02-24 09:16:54] [init] DoPECtrlTestValues returned: 0x0000
+[2026-02-24 09:16:54] [init] Calling DoPETransmitData...
+[2026-02-24 09:16:54] [init] DoPETransmitData returned: 0x0000
+[2026-02-24 09:16:54] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:16:54] [stop_move] DoPEFMove STOP
+[2026-02-24 09:16:54] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:16:54] Stopped
+[2026-02-24 09:17:04] [setup] DoPESelSetup(1) -> 0x0000 (tan_first=23997, tan_last=23997)
+[2026-02-24 09:17:04] [setup] Range=10 kN: selected SensorNo=1, Upper≈11021.9, Unit=7, Conn=14, State=7
+[2026-02-24 09:17:05] [autofix] sensor 4 baseline within limits: -4.708 (limits -120..120)
+[2026-02-24 09:17:41] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:17:41] [stop_move] DoPEFMove STOP
+[2026-02-24 09:17:41] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:17:41] Stopped
+[2026-02-24 09:17:49] [setup] DoPESelSetup(1) -> 0x0000 (tan_first=24172, tan_last=24172)
+[2026-02-24 09:17:49] [setup] Range=10 kN: selected SensorNo=1, Upper≈11021.9, Unit=7, Conn=14, State=7
+[2026-02-24 09:17:49] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:17:56] [limit] Apply limits: SensorNo=1, UpperSet=1000, UpperReset=980, LowerReset=-980, LowerSet=-1000 (convention: pull positive, push negative)
+[2026-02-24 09:17:56] [limit] Note: Reset is 2% closer to zero (hysteresis) to avoid chattering near the threshold
+[2026-02-24 09:17:56] [limit] DoPESetCheckLimit returned: 0x0000
+[2026-02-24 09:18:03] [move_up] Calling DoPEFMove, speed=0.01
+[2026-02-24 09:18:03] [move_up] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:03] Moving up (speed: 10 mm/s)
+[2026-02-24 09:18:03] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:18:03] [stop_move] DoPEFMove STOP
+[2026-02-24 09:18:03] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:03] Stopped
+[2026-02-24 09:18:03] [move_up] Calling DoPEFMove, speed=0.01
+[2026-02-24 09:18:03] [move_up] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:03] Moving up (speed: 10 mm/s)
+[2026-02-24 09:18:03] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:18:03] [stop_move] DoPEFMove STOP
+[2026-02-24 09:18:03] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:03] Stopped
+[2026-02-24 09:18:04] [move_down] Calling DoPEFMove, speed=0.01
+[2026-02-24 09:18:04] [move_down] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:04] Moving down (speed: 10 mm/s)
+[2026-02-24 09:18:04] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:18:04] [stop_move] DoPEFMove STOP
+[2026-02-24 09:18:04] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:04] Stopped
+[2026-02-24 09:18:05] [move_down] Calling DoPEFMove, speed=0.01
+[2026-02-24 09:18:05] [move_down] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:05] Moving down (speed: 10 mm/s)
+[2026-02-24 09:18:05] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:18:05] [stop_move] DoPEFMove STOP
+[2026-02-24 09:18:05] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:05] Stopped
+[2026-02-24 09:18:22] [stop_move] DoPEHalt returned: 0x0000
+[2026-02-24 09:18:22] [stop_move] DoPEFMove STOP
+[2026-02-24 09:18:22] [stop_move] DoPEFMove returned: 0x0000
+[2026-02-24 09:18:22] Stopped
+[2026-02-24 09:18:22] ✅ Manual speed pending: switch is armed with MaxSpeed=0 (no initial speed). Keep knob at baseline for ~0.3s; then first movement beyond DxTrigger=3 applies target MaxSpeed=0.010000 (baselineSensorD=0.000). Press Stop to exit.
+[2026-02-24 09:18:22] [digipoti_speed] Knob centered & stable (SensorD=0.000, noise≈0.000); armed (MaxSpeed=0, DxTrigger=3) -> 0x0000
+[2026-02-24 09:18:31] [digipoti_pos] DoPEFDPoti: sensor=3, dz=0, mode=0, scale=1.0, maxSpeed=0.01
+[2026-02-24 09:18:31] [digipoti_pos] DoPEFDPoti(Mode=0) returned: 0x0000
+[2026-02-24 09:18:31] ✅ Manual position active: use panel knob; press Stop to exit
+[2026-02-24 09:18:32] [digipoti_pos] DoPEFDPoti: sensor=3, dz=0, mode=0, scale=1.0, maxSpeed=0.01
+[2026-02-24 09:18:32] [digipoti_pos] DoPEFDPoti(Mode=0) returned: 0x0000
+[2026-02-24 09:18:32] ✅ Manual position active: use panel knob; press Stop to exit
+[2026-02-24 09:19:15] [origin] Origin set: zero_abs=-0.183781 (display Position=0)
+[2026-02-24 09:20:11] [cycles] Start: cycles=3, target=10 µm, speed=10000 µm/s. Logging to: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092011.csv
+[2026-02-24 09:20:11] [cycles] Move to target => 0x0000
+[2026-02-24 09:20:12] [cycles] Cycle 1/3: reached target, returning to origin => 0x0000
+[2026-02-24 09:20:13] [cycles] Cycle 2/3: reached origin, moving to target => 0x0000
+[2026-02-24 09:20:15] [cycles] Cycle 2/3: reached target, returning to origin => 0x0000
+[2026-02-24 09:20:16] [cycles] Cycle 3/3: reached origin, moving to target => 0x0000
+[2026-02-24 09:20:18] [cycles] Cycle 3/3: reached target, returning to origin => 0x0000
+[2026-02-24 09:20:19] [cycles] Completed. CSV saved: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092011.csv
+[2026-02-24 09:20:36] [cycles] Start: cycles=3, target=10000 µm, speed=1000 µm/s. Logging to: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092036.csv
+[2026-02-24 09:20:36] [cycles] Move to target => 0x0000
+[2026-02-24 09:20:47] [cycles] Cycle 1/3: reached target, returning to origin => 0x0000
+[2026-02-24 09:20:59] [cycles] Cycle 2/3: reached origin, moving to target => 0x0000
+[2026-02-24 09:21:10] [cycles] Cycle 2/3: reached target, returning to origin => 0x0000
+[2026-02-24 09:21:22] [cycles] Cycle 3/3: reached origin, moving to target => 0x0000
+[2026-02-24 09:21:33] [cycles] Cycle 3/3: reached target, returning to origin => 0x0000
+[2026-02-24 09:21:45] [cycles] Completed. CSV saved: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092036.csv
+[2026-02-24 09:24:31] [keithley] Logging to: C:\Users\cho77175\Desktop\code\temp\keithley_20260224_092431.csv
+[2026-02-24 09:24:31] [keithley] Subprocess logging started (64-bit): resource='GPIB0::17::INSTR', channels=[1, 2, 3, 4], freq=2.00 Hz
+[2026-02-24 09:24:31] [cycles] Start: cycles=2, target=10000 µm, speed=2000 µm/s. Logging to: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092431.csv
+[2026-02-24 09:24:31] [cycles] Move to target => 0x0000
+[2026-02-24 09:24:34] [keithley] IDN: KEITHLEY INSTRUMENTS INC.,MODEL 2700,1009042,B06  /A02
+[2026-02-24 09:24:37] [cycles] Cycle 1/2: reached target, returning to origin => 0x0000
+[2026-02-24 09:24:44] [cycles] Cycle 2/2: reached origin, moving to target => 0x0000
+[2026-02-24 09:24:50] [cycles] Cycle 2/2: reached target, returning to origin => 0x0000
+[2026-02-24 09:24:57] [keithley] CSV saved: C:\Users\cho77175\Desktop\code\temp\keithley_20260224_092431.csv
+[2026-02-24 09:24:57] [cycles] Completed. CSV saved: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092431.csv
+[2026-02-24 09:29:32] [keithley] Logging to: C:\Users\cho77175\Desktop\code\temp\keithley_20260224_092932.csv
+[2026-02-24 09:29:32] [keithley] Subprocess logging started (64-bit): resource='GPIB0::17::INSTR', channels=[1, 2, 3, 4], freq=2.00 Hz
+[2026-02-24 09:29:32] [cycles] Start: cycles=2, target=10000 µm, speed=2000 µm/s. Logging to: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092932.csv
+[2026-02-24 09:29:32] [cycles] Move to target => 0x0000
+[2026-02-24 09:29:33] [keithley] IDN: KEITHLEY INSTRUMENTS INC.,MODEL 2700,1009042,B06  /A02
+[2026-02-24 09:29:39] [cycles] Cycle 1/2: reached target, returning to origin => 0x0000
+[2026-02-24 09:29:45] [cycles] Cycle 2/2: reached origin, moving to target => 0x0000
+[2026-02-24 09:29:52] [cycles] Cycle 2/2: reached target, returning to origin => 0x0000
+[2026-02-24 09:29:59] [keithley] CSV saved: C:\Users\cho77175\Desktop\code\temp\keithley_20260224_092932.csv
+[2026-02-24 09:29:59] [cycles] Completed. CSV saved: C:\Users\cho77175\Desktop\code\temp\target_cycles_20260224_092932.csv
+[2026-02-24 09:35:39] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:40] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:40] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:40] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:40] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:40] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:41] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:41] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:41] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:41] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:41] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:42] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:42] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:42] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:42] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:42] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:43] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:43] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:43] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:43] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:43] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:44] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:44] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:44] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:44] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:44] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:45] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:45] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:45] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:45] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:45] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:46] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:46] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:46] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:46] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:46] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:47] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:47] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:47] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:47] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:47] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:48] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:48] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:48] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:48] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:48] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:49] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:49] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:49] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:49] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:49] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:50] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:50] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:50] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:50] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:50] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:51] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:51] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:51] [loop] DoPEGetData returned: 0x8001
+[2026-02-24 09:35:51] [stop_move] DoPEHalt returned: 0x8003
+[2026-02-24 09:35:51] [stop_move] DoPEFMove STOP
+[2026-02-24 09:35:51] [stop_move] DoPEFMove returned: 0x8003
+[2026-02-24 09:35:51] Stopped
+[2026-02-24 09:35:51] [disconnect] Stopping background sampling thread...
+[2026-02-24 09:35:51] [disconnect] Disconnecting hardware...
+[2026-02-24 09:35:51] [disconnect] DoPEHalt: 0x8003
+[2026-02-24 09:35:51] [disconnect] DoPECloseLink: 0x8004
+[2026-02-24 09:35:51] Disconnected
+[2026-02-24 09:35:52] [stop_move] Not connected

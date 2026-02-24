@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="11"/>
+    <BuildModes Active="Default"/>
+    <Units Count="3">
+      <Unit0>
+        <Filename Value="DoPEDemo.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="9" Y="15"/>
+        <UsageCount Value="20"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="frmdopedemo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmDoPEDemo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="frmDoPEDemo"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="513"/>
+        <CursorPos Y="541"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\include\DoPE.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="773"/>
+        <CursorPos X="80" Y="1238"/>
+        <UsageCount Value="10"/>
+      </Unit2>
+    </Units>
+    <JumpHistory Count="20" HistoryIndex="19">
+      <Position1>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="19" Column="7"/>
+      </Position1>
+      <Position2>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="45" Column="7" TopLine="21"/>
+      </Position2>
+      <Position3>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="39" Column="105" TopLine="22"/>
+      </Position3>
+      <Position4>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="40" Column="105" TopLine="17"/>
+      </Position4>
+      <Position5>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="57" Column="3" TopLine="36"/>
+      </Position5>
+      <Position6>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="69" Column="3" TopLine="45"/>
+      </Position6>
+      <Position7>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="820" TopLine="796"/>
+      </Position7>
+      <Position8>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="737" Column="3" TopLine="730"/>
+      </Position8>
+      <Position9>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="753" Column="3" TopLine="746"/>
+      </Position9>
+      <Position10>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="769" Column="3" TopLine="762"/>
+      </Position10>
+      <Position11>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="785" Column="3" TopLine="778"/>
+      </Position11>
+      <Position12>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="801" Column="3" TopLine="794"/>
+      </Position12>
+      <Position13>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="817" Column="3" TopLine="804"/>
+      </Position13>
+      <Position14>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="525" Column="94" TopLine="504"/>
+      </Position14>
+      <Position15>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="9"/>
+      </Position15>
+      <Position16>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="80" Column="21" TopLine="57"/>
+      </Position16>
+      <Position17>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="82" Column="21" TopLine="57"/>
+      </Position17>
+      <Position18>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="149" Column="9" TopLine="109"/>
+      </Position18>
+      <Position19>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="555" Column="48" TopLine="570"/>
+      </Position19>
+      <Position20>
+        <Filename Value="frmdopedemo.pas"/>
+        <Caret Line="541" TopLine="513"/>
+      </Position20>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0" ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

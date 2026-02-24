@@ -1,0 +1,1058 @@
+*******************************************************************************
+Project  : DoPE (DOLI PC-EDC Interface)
+Author   : HEG
+Copyright: 2001 DOLI Elektronik GmbH
+Internet : http://www.doli.de
+Email    : info@doli.de
+*******************************************************************************
+
+VERSION HISTORY:
+================
+
+V 2.20   30.05.2001  HEG:
+-------------------------
+  - DoPEHandle checked for NULL value to prevent protection Fault in:
+    - DoPEClrCheckSync
+    - DoPEPosSync
+    - DoPEPosG2_ASync
+  - DoPESetBasicTare(Sync): new softends adjusted to range limits
+  - "pMsg" pointer error removed from callback
+  - 'Win32 Release' Project Settings changed from 'disable' to 'optimze speed'
+  - DoPERdSensorInfo: returns  current basic tare, range limit and soft limit
+    values in host units
+  - DoPERdSensorInfo: range limit units changed from % to host units (N,mm,...)
+  - DoPERefr(Sync): shortest refreshtime limited to SysT
+  - DoPEGetData: test values scaled to host units (test1 and test2 in host units
+    of the current control mode, Test3 in % of the output channel max. value)
+  - DoPECtrlError(Sync): 'Tare bug' removed
+  - New DoPE function DoPECurrentData
+  - New DoPE function DoPESetupScale
+  - Userscale used for normalization in
+    - DoPERdSensorInfo
+    - DoPERdCtrlSensorDef, DoPEWrCtrlSensorDef(Sync)
+    - DoPERdMachineDef, DoPEWrMachineDef(Sync)
+    - DoPERdLinTbl, DoPEWrLinTbl(Sync)
+  - Load optimization disabled for WIN16 resource compiler
+  - Machine normalization error for destination deccelaration removed:
+    - DoPEPosG1_A(Sync)
+    - DoPEPosD1_A(Sync)
+  - DoPESetCheckX(Sync): Tare parameter is obsolete and set intenaly to 0
+  - CON_X10 defined for EDC30/EDC120
+  - Setup access functions work without DoPESelectSetup
+    - DoPEOpenSetup(Sync)
+    - DoPERdSetupAll(Sync)
+    - DoPEWrSetupAll(Sync)
+  - 'InCallback check' for:
+    - DoPECloseConnection
+    - DoPERdSensorDef
+    - DoPERdCtrlSensorDef
+    - DoPERdOutChannelDef
+    - DoPERdBitOutDef
+    - DoPERdBitInDef
+    - DoPERdMachineDef
+    - DoPERdLinTbl
+    - DoPERdGeneralData
+    - DoPERdBitInput
+    - DoPEMemInfo
+  - Removed from WIN16 code:
+    - DoPEOpenSetupSync
+    - DoPECloseSetupSync
+    - DoPERdSetupAllSync
+    - DoPEWrSetupAllSync
+    - DoPESendMsgSync
+  - Internal redirection to the Sync version for:
+    - DoPEOpenSetup
+    - DoPECloseSetup
+    - DoPEWrSensorDef
+    - DoPEWrCtrlSensorDef
+    - DoPEWrOutChannelDef
+    - DoPEWrBitOutDef
+    - DoPEWrBitInDef
+    - DoPEWrMachineDef
+    - DoPEWrLinTbl
+    - DoPEWrSysUserData
+    - DoPEWrSenUserData
+    - DoPEWrGeneralData
+
+Version V 2.21   1.1.2002  HEG:
+-------------------------------
+  - Removed DoPE functions:
+    - DoPEOpenConnection, DoPECloseConnection
+  - New DoPE functions:
+    - DoPEOpenLink, DoPECloseLink
+    - DoPEPosExt(Sync)
+    - DoPEPosExt_A(Sync)
+    - DoPESetDither(Sync)
+    - DoPEDebugOutputFlags
+    - DoPEDebugOutput
+    - DoPEDebugPrintf
+  - EDC serial number added to DoPEVersion structure
+  - SensorNo added to DoPECheckM structure
+  - DoPEGetMsg: Position in DoPECheckM structure normalized correctly
+  - CHK_NOCHECK definition removed
+  - MaxCurrTime, DitherFrequency, DitherAmplitude, CurrentControllerGain,
+    Signal, SignalFrequency, ChangeDirection and ChangeDirectionLevel
+    added to DoPEOutChaDef structure
+  - Definitions for the DoPEPosExt... commands:
+    - LIMIT_ABSOLUTE, LIMIT_RELATIVE, DEST_APPROACH, DEST_POSITION, DEST_MAINTAIN
+  - Definitions for the digital command outpus CurrentControllerGain, signal and
+    frequency in DoPEOutChaDef:
+    - OUTSIGNAL_A_B, OUTSIGNAL_PULSE_SIGN, OUTSIGNAL_UP_DOWN
+    - OUTSIGNALFREQU2MHz, OUTSIGNALFREQU1MHz, OUTSIGNALFREQU500kHz,
+      OUTSIGNALFREQU250kHz, OUTSIGNALFREQU120kHz, OUTSIGNALFREQU60kHz,
+      OUTSIGNALFREQU30kHz, OUTSIGNALFREQU10kHz, OUTSIGNALFREQU_MAX
+    - OUTCURRCTRLGAINSET_0_01mH, OUTCURRCTRLGAINSET_0_03mH,
+      OUTCURRCTRLGAINSET_0_05mH, OUTCURRCTRLGAINSET_0_09mH,
+      OUTCURRCTRLGAINSET_0_18mH, OUTCURRCTRLGAINSET_0_35mH,
+      OUTCURRCTRLGAINSET_0_7mH,  OUTCURRCTRLGAINSET_1_5mH,
+      OUTCURRCTRLGAINSET_3H,     OUTCURRCTRLGAINSET_5mH,
+      OUTCURRCTRLGAINSET_9mH,    OUTCURRCTRLGAINSET_18mH,
+      OUTCURRCTRLGAINSET_35mH,   OUTCURRCTRLGAINSET_75mH,
+      OUTCURRCTRLGAINSET_150mH,  OUTCURRCTRLGAINSET_300mH,
+      OUTCURRCTRLGAINSET_MAX
+  - Output channel normalization corrected. Negate bit is not used any more.
+  - Output channel normalization uses nominal current limit as 100%
+  - New subsystem command error AUF_NIM mapped to DoPE error DoPERR_NOFUNC
+  - New command error definition CMD_ERROR_NIM
+  - Message window API removed from WIN16 DoPE
+  - Message window API replaced by DoPEDebugOutput and DoPEDebugPrintf in WIN32
+  - Definitions for the debug API:
+    - DoPEDebQuiet, DoPEDebERR, DoPEDebAPI, DoPEDebAPIRc, DoPEDebAPIRcNoErr,
+      DoPEDebCallback, DoPEDebALL
+
+Version V 2.22   23.1.2002  SAH:
+--------------------------------
+  - New PM10.h with correct PS_AKINFOX definition
+  - Error in DoPESpeedLimit corrected. REGART_S was used instead of Ctrl!!
+  - New Names for OUTCURRCTRLGAINSET_x_xxxmH Constants:
+    - OUTCURRCTRLGAINSET_0_009mH, OUTCURRCTRLGAINSET_0_018mH,
+      OUTCURRCTRLGAINSET_0_037mH, OUTCURRCTRLGAINSET_0_073mH,
+      OUTCURRCTRLGAINSET_0_15mH,  OUTCURRCTRLGAINSET_0_29mH,
+      OUTCURRCTRLGAINSET_0_59mH,  OUTCURRCTRLGAINSET_1_2mH,
+      OUTCURRCTRLGAINSET_2_3H,    OUTCURRCTRLGAINSET_4_7mH,
+      OUTCURRCTRLGAINSET_9_4mH,   OUTCURRCTRLGAINSET_19mH,
+      OUTCURRCTRLGAINSET_38mH,    OUTCURRCTRLGAINSET_75mH,
+      OUTCURRCTRLGAINSET_150mH,   OUTCURRCTRLGAINSET_300mH,
+
+Version V 2.23   11.4.2003  HEG:
+--------------------------------
+  - Bug in DoPESetCheck removed (sent the command twice to the EDC)
+  - DoPESetNotification locks the initialization of the linkdata
+    (EventMask, NotifyProc, NotifyWnd, NotifyMsg) and resets the internal
+    measuring circular buffer
+  - Minor bug in DoPESetupScale removed (sent wrong function names to the
+    debug port if an error exit occured)
+  - DoPEExt2Ctrl Scale parameter normalized
+  - DoPEFDPoti Scale parameter normalized
+  - Delay time correction after DoPEIntgr(Sync) calls
+  - NominalValue in SensorInformation is set to 1 for rotary sensors (Inc/Rev)
+  - WIN16 support removed
+  - New constant definitions for 'MsgId' in MOVE_CTRL_MSG: CMSG_SHIELD_ERR
+  - New connector definitions CON_X62A, CON_X62B, CON_X62C, CON_X62D
+  - DoPEHaltW Delay time extended to LONG_MAX seconds
+  - DoPE handle checked in DoPESetDither(Sync)
+  - All out channels normalized to %
+  - New interface functions:
+    - DoPEGetDebugOutputFlags
+    - DopeCtrlTestValuesSync
+    - DoPEThreadPollHdlr
+    - DoPESetOn...Hdlr
+    - DoPESetOn...RtHdlr
+    - DoPESetRefSignalModeSync
+    - DoPESetRefSignalTareSync
+    - DoPESetOutChannelOffset(Sync)
+    - DoPESynchronizeSystemMode(Sync)
+    - DoPESynchronizeSystemStart(Sync)
+    - DoPEWrSensorMsg(Sync)
+    - DoPERdSensorHeaderDataSync
+    - DoPERdSensorAnalogueDataSync
+    - DoPEWrSensorAnalogueDataSync
+    - DoPERdSensorIncDataSync
+    - DoPEWrSensorIncDataSync
+    - DoPERdSensorAbsDataSync
+    - DoPEWrSensorAbsDataSync
+    - DoPERdSensorUserDataSync
+    - DoPEWrSensorUserDataSync
+    - DoPERdSensorConKey
+    - DoPEPosPID(Sync)
+    - DoPESpeedPID(Sync)
+    - DoPEPosFeedForward(Sync)
+  - DoPECtrlP_Xpp(Sync) removed (returns DoPERR_NOFNC)
+  - Mutexes replaced by critical sections
+  - New MOVE_CTRL_MSG message DoPERefSignalM
+  - New SENSOR_MSG message DoPESensorM
+  - Report 'flashing bits' in the measuring data record as set
+  - New setup Offset parameter in DoPEOutChaDef
+
+Version V 2.24   25.4.2003  HEG:
+--------------------------------
+  - DoPE functions renamed:
+    - DoPECtrlTestValuesSync -> DoPECtrlTestValues
+    - DoPESetRefSignalModeSync -> DoPESetRefSignalMode
+    - DoPESetRefSignalTareSync -> DoPESetRefSignalTare
+  - TAN parameter added to:
+    - DoPESetRefSignalMode
+    - DoPESetRefSignalTare
+  - accuracy improved:
+    - DoPESynchronizeSystemMode: delay time
+    - DoPECycle, DoPECosineX: Halt1 and Halt2
+    - DoPEHaltW, DoPEHaltW_A: Delay
+  - DoPESetBasicTare(Sync):
+    - channel and shield limits adjusted and limited to range limits
+    - softend adjustment to range limits modified
+
+Version V 2.25   12.6.2003  HEG:
+--------------------------------
+  - DoPESetBasicTare(Sync) bugfix:
+    - softend, channel and shield limits adjustment to range limits
+      work now with negative userscale
+    - Mode 0 uses oldest sample in the ring buffer
+    - returns DoPERR_NODATA in Mode 0 (if there are no samples)
+
+Version V 2.26   2.7.2003  HEG:
+-------------------------------
+  - DoPEIntgr(Sync) bugfix:
+    - DelayTimeCorrection cleared prior to integration time command to
+      eliminate parameter error.
+  - DoPERd/WrSetupAll and DoPERd/WrOutChannelDef version management bugfix:
+    - API version check corrected
+    - alignment adapted
+  - DoPEAPIVERSION changed to 2.26 due to DoPERd/WrSetupAll bugfix
+  - DoPEOpenLink returns DoPERR_VERSION if the DoPE user (EXE) has a higer
+    APIVersion than the DoPE.DLL
+  - DoPEInitialize /DopeSelSetup bugfix:
+    - PosAck is enabled even if a initialization error occurs
+  - Connector X61A (calculated measuring channel) handled
+  - New absolute sensor definition SIG_MTR_SSI_S2Bx102
+  - DoPERdSensorInfo bugfix:
+    - reports now the correct SoftLimitReaction
+
+
+Version V 2.27   22.9.2003  HEG:
+--------------------------------
+  - Sensor handling bugfix:
+    - unknown modules lead to error return codes
+    - read loops leave CPU power to other threads
+  - 4FAD sensor handling implemented
+  - DoPEOpenLink leaves CPU power to other threads during 'wait for ONLINE'
+  - DoPERd/WrSensor... leaves CPU power to other threads during EEPROM access
+  - DoPESetBasicTare(Sync) bugfix:
+    - check and shield limits adjusted only for selected sensor
+  - Constants for MachineNoIo in DoPEGeneralData defined:
+    - MACHINE_NO_IO_OFF
+    - MACHINE_NO_IO_IN_OUT
+    - MACHINE_NO_IO_OUT
+    - MACHINE_NO_IO_IN
+  - API version management for MACHINE_NO_IO_OUT and MACHINE_NO_IO_IN added to
+    DoPERdGeneralData and DoPEWrGeneralData(Sync)
+  - New interface functions:
+    - DoPEOfflineActionBitOutput(Sync)
+    - DoPEOfflineActionOutput(Sync)
+  - Constants for Mode in DoPEOfflineAction(Bit)Output(Sync) defined:
+    - DO_NOTHING
+    - USE_INIT_VALUE
+    - USE_VALUE
+  - DoPERdSensorDef bugfix:
+    - DoPESenDef init value set to the correct value
+
+
+Version V 2.28   28.6.2004  HEG:
+--------------------------------
+  - Eventhandler cleanup bugfix:
+    - missing DoPESetOnRuntimeErrorHdlr and DoPESetOnRuntimeErrorRtHdlr
+      eventhandler cleanup implemented in DoPECloseLink
+  - DoPEMc2Output(Sync) bugfix:
+    - Scale parameter normalized [% / (sensor unit * user scale)]
+    - Adjust Mc2Output settings at DoPESetBasicTare(Sync)
+
+
+Version V 2.29   10.12.2004  HEG:
+--------------------------------
+  - DoPEAPIVERSION set to the DoPE version
+  - New connector definitions CON_X61B, CON_X61C, CON_X61D
+  - New CtrlState1 definitions CTRL_SYNCHWAIT and CTRL_SLAVE
+  - New DoPE functions:
+    - DoPEOff(Sync)
+    - DoPESerialSensorDef(Sync)
+    - DoPESetSerialSensor(Sync)
+  - SERSEN_TRANSFER defined
+  - SERSEN_ENDCHAR_NO, SERSEN_ENDCHAR_1, SERSEN_ENDCHAR_1_OR_2,
+    SERSEN_ENDCHAR_1_AND_2 and SERSEN_ENDCHAR_1_PLUS1 defined
+  - SERSEN_SET_COMMAND and SERSEN_SET_FEEDBACK defined
+  - CTRL_STRUCTURE_OPENLOOP defined
+  - O_SIG_ON_RELAY, O_SIG_READY_TO_MOVE and O_SIG_INTERNAL_DRIVE_ENABLE defined
+  - New setup parameters in DoPEMachineDef:
+    - CtrlOnMode
+    - FixValue
+    - InitValue
+    - ReturnValue
+  - Keep stand allone settings for check limits, shield limits and Mc2Output
+    definitions after initialization
+  - Initialization error handling modified:
+    - reset the DoPE internal link handle data
+    - process as many initialization steps as possible
+    - report first DoPE error
+
+Version V 2.30   2.3.2005  HEG:
+-------------------------------
+  - Visual Studio .NET used
+  - TLib version control not used any more
+  - DataNormalization bugfix:
+    no more fixed 0 values for sensors 10 to 15
+  - DoPEWrMachineDef debug output bugfix (reported DoPERdMachineDef)
+  - DoPEWrMachineDef transmit length adjusted to old Dpx limits
+  - DoPESelSetup reports DoPERR_PARAMETER if one or more UserScale values are 0
+  - Serial sensor definition init value definitions:
+    - SERSEN_SIGN_P, SERSEN_SIGN_N
+    - SERSEN_PORT_DEBUG, SERSEN_PORT_COM1 , SERSEN_PORT_COM2, SERSEN_PORT_COM3
+    - SERSEN_STOPBIT_1, SERSEN_STOPBIT_2
+    - SERSEN_110BAUD, SERSEN_150BAUD, SERSEN_300BAUD, SERSEN_600BAUD
+    - SERSEN_1200BAUD, SERSEN_2400BAUD, SERSEN_4800BAUD, SERSEN_9600BAUD
+    - SERSEN_19200BAUD, SERSEN_38400BAUD, SERSEN_57600BAUD, SERSEN_115200BAUD
+    - SERSEN_230400BAUD, SERSEN_460800BAUD, SERSEN_921600BAUD
+    - SERSEN_NOPROTOCOL, SERSEN_DOLIPROTOCOL, SERSEN_EUROTHERM, SERSEN_GRADO
+    - SERSEN_AI_808
+    - SERSEN_NOPARITY, SERSEN_ODDPARITY, SERSEN_EVENPARITY
+    - SERSEN_7DATABIT, SERSEN_8DATABIT
+
+Version V 2.31   24.6.2005  HEG:
+--------------------------------
+  - Discarding pending and supressing new measured values during initialization
+
+Version V 2.32   5.7.2005  HEG:
+-------------------------------
+  - Extending delay time for DoPEHaltW(Sync) and DoPEHaltW_A(Sync) from
+    100000 s to 7FFFFFFFh ticks for EDC100 and EDC5/25 controllers
+  - Parametercheck for delay times implemented for:
+    - DoPECycle(Sync), DoPECosineX(Sync), DoPESynchronizeSystemMode(Sync),
+  - Parametercheck for destination window (time) implemented for:
+    - DoPEDestWnd(Sync)
+
+Version V 2.50   22.3.2006  HEG:
+--------------------------------
+  - NtDpx.dll replaced by DoDpx.dll for COM, USB and LAN support
+  - DoPEOpenSetup bugfix:
+    report DoPERR_CMD_PAR for invalid setup numbers
+  - DoPESerialSensorDef(Sync) bugfix (EndChar2 was set to EndChar1)
+  - New DoPE functions:
+    - DoPEDefineNIC
+    - DoPEPortInfo
+    - DoPEInitializeResetXHead
+    - DoPERdModuleInfo
+  - Port info definitions:
+    - DoPEPORTCOM, DoPEPORTUSB, DoPEPORTLAN, DoPEPORTNAMELEN
+    - MAC, DoPE_PORTINFO
+  - DoPEModuleInfo structure defined
+  - DoPEModuleInfo status definitions:
+    - MODSTAT_OK, MODSTAT_HWFAIL, MODSTAT_NOMODULE, MODSTAT_NODRIVER
+      MODSTAT_REMOTE, MODSTAT_SWFAIL
+  - MAX_MODULE defined
+  - DoPEGeneralData extended:
+    - nRmc, Language, FunctionID
+  - Language definitions:
+    - LANGUAGE_ENGLISH, LANGUAGE_GERMAN, LANGUAGE_SPANISH, LANGUAGE_FRENCH
+  - DoPERR_COMPARAMETER error code defined
+  - Sensor EEPROM handling for connectors X61B, X61C and X61D implemented
+  - Sensor EEPROM handling for EDC220 and EDC580 implemented
+  - Debug output for all sensor types implemented
+  - Time normalization changed from signed to unsigned
+  - DoPERefr, DoPESetTime, DoPEIntgr, DoPEConfCMcSpeed, DoPEConfCMcGradient
+    reprort parameter error for times < 0
+  - Machine definition times (SpeedCtrlTime, PosCtrlTime, DataAqTime) precision
+    increased (adjusted to 100µs ticks)
+  - Output and Feedback normalization bugfix:
+    - host controller scale used used for all types of sensors
+  - DoPEWrSetupAll version handling bugfix:
+    - old applications (built with DoPE 2.28 or older) clobbered the LinTbl
+
+Version V 2.51   13.7.2006  HEG:
+--------------------------------
+  - Obsolete functions and definitions removed
+    - DoPEOpenMsgWnd, DoPECloseMsgWnd, DoPEAddMsgStr, DoPEMeldWndProc
+    - DoPECtrlP(Sync), DoPECtrlP_Xp(Sync), DoPECtrlP_Xpp(Sync), DoPECtrlPGKTd(Sync)
+    - DoPECtrlPNorm(Sync), DoPECtrlP_XpNorm(Sync), DoPECtrlP_XppNorm(Sync)
+    - DoPEMTSpecial(Sync)
+    - DoPEGetRTErr
+    - CBR_57600, CBR_115200
+    - CTRL_STRUCTURE_PNEUMATIC
+  - New DoPE functions:
+    - DoPERdNumberOfKeyboards
+    - DoPESetKeyShiftState
+    - DoPERdKeyShiftState
+    - DoPESetLed
+    - DoPELedMask
+    - DoPECurrentKeys
+    - DoPEKeyPressed
+    - DoPEKeyGet
+    - DoPESetOnKeyMsgHdlr
+    - DoPESetOnKeyMsgRtHdlr
+    - DoPESynchronizeData
+    - DoPESetOnSynchronizeDataHdlr
+    - DoPESetOnSynchronizeDataRtHdlr
+    - DoPEClearErrors
+    - DoPESetIoCompatibilityMode
+  - New and renamed definitions:
+    - DoPERefr(Sync) -> DoPESetDataTransmissionRate(Sync)
+    - DoPECosineV(Sync) -> DoPECosinePeakCtrl(Sync)
+    - DoPEStop(Sync) -> DoPESetCtrl(Sync)
+      - Argument 'unsigned short State' redefined to 'unsigned Enable'
+        and level inverted
+    - DoPEOutChaDef:
+	  - OUTSIGNAL_ANALOGUE, OUTSIGNAL_DDD
+	  - OUTSIGNALFREQU4MHz
+	  - OUTSIGNALFREQU120kHz -> OUTSIGNALFREQU125kHz
+	  - OUTSIGNALFREQU10kHz  -> OUTSIGNALFREQU15kHz
+	- InSignals:
+      - IN_SIG_STOP   -> IN_SIG_NO_CTRL
+      - IN_SIG_SH_KEY -> IN_SIG_SH_INACTIVE
+    - DoPECtrlSenDef:
+      - WndSize    -> UnUsed1
+      - WndTime    -> UnUsed2
+      - PosK	   -> PosP
+      - PosTi	   -> PosI
+      - PosTd      -> PosD
+      - PosGenTd   -> PosFFP
+      - SpeedK	   -> SpeedP
+      - SpeedTi	   -> SpeedI
+      - SpeedTd	   -> SpeedD
+      - SpeedGenTd -> UnUsed3
+      - AccK       -> UnUsed4
+    - DoPEOutChaDef:
+      - ChangeDirection      -> UnUsed1
+      - ChangeDirectionLevel -> UnUsed2
+    - DoPEMachineDef:
+      - DataAqTime     -> DataTransmissionRate
+      - Bypass         -> UnUsed3
+      - MotorEncRatio  -> UnUsed4
+      - ClampConnector -> GripConnector
+      - ClampChannel   -> GripChannel
+      - ClampActive    -> GripActive
+    - DoPEGetData, DoPECurrentData:
+      - Argument 'void *Buffer' redefined to 'DoPEData *Sample'
+    - DoPESetRefSignalTare:
+      - REFSIG_TARE
+    - DoPESetBasicTare:
+      - BASICTARE_SET
+      - BASICTARE_SUBTRACT
+  - INC sensor read division by zero bugfix
+    - InterpolationFactor must not be zero (set to 1 in case)
+  - DoPERdModuleInfo bugfix
+    - all module names padded to 6 char length
+    - revision -1 (received from Subsy 10.13 and older) changed to revision 0
+  - DoPESynchronizeSystemMode(Sync) and DoPESynchronizeSystemStart(Sync)
+    moved from Dope.h to module DoPEsyn.h
+  
+Version V 2.52   24.7.2006  HEG:
+--------------------------------
+  - OnSynchronizeData(Rt) handler removed in DoPECloseConnection
+  - IO normalization implemented
+    - DoPERdBitInDef/DoPEWrBitInDef StopLevel
+    - DoPERdBitInput
+    - measured values bit inputs
+  - DoPERdOutChannelDef bugfix:
+    SignalFrequency set to OUTSIGNALFREQU2MHz for old PE interface (V2.20 and older)
+  - DoPEWrSetupAllSync bugfix:
+    Accept DoPERR_CMD_PARCORR from DoPEWrOutChannelDef(Sync)
+  - DoPERdBitInput/DoPERdSensorConKey bugfix:
+    4TAST input bits must be read twice to get current state
+  - DoPERdSensorConKey uses 4TAST connect bit (X2xC bit 9) for the DigiPoti
+    connected status
+  - Legacy device support for keys and LEDs:
+    - DoPESetLed(Sync) maps to DoPELed(sync)
+    - DoPECurrentKeys reads keas with DoPECurrentData
+    - Key message emulation
+  - SYNCHRONIZE_MAX max. number of links to synchronize defined
+  - DoPESynchronizeData bugfix:
+    function reported invalid timeout error
+  - 'blind' function keys and LED's for RMC's without LCD defined:
+    DoPE_LED_BF1...DoPE_LED_BF3 ,DoPE_KEY_BF1...DoPE_KEY_BF3
+  
+Version V 2.53   29.8.2006  HEG:
+--------------------------------
+  - DoPELed and DoPESetLed reported DoPERR_NOFLOAT if called from Callback. Bug fixed.
+  - OnData handler was not called sometimes, due to synchronization problems. Bug fixed.
+  - DoPEExt2Ctrl(Sync) and DoPEFDPoti(Sync) returned DoPERR_ZERODIV if the nominal value
+    of the sensor for the external command input was 0.
+    Changed the return code to DoPERR_PARAMETER.
+
+Version V 2.54   20.11.2006  HEG:
+--------------------------------
+  - DoPECurrentData delivered wrong data after a DoPESetNotification, DoPEConfTestValues
+    or DoPECtrlTestValues call. Bug fixed.
+  - Absolute value sensor type SIG_TR_LT_S redefined to SIG_ROQ_424.
+  - Machine normalization devide by zero bug fixed:
+    (HostCtrlScale set to one if a zero was read from the sensor table).
+  - EDC580 support implemented
+
+Version V 2.55   2.5.2007  HEG:
+-------------------------------
+  - Closed loop controller setup in DoInst Installation Center didn't work with
+    EDC application 9133.6 (no graphik was drawn). Bug fixed.
+  - DoPESynchronizeData bugfix:
+    multiple calls didn't work (DoPERR_TIMEOUT)
+  - DoPESynchronizeData accepts null pointer as handle array to clear running
+    synchronization
+
+Version V 2.56   15.5.2007  HEG:
+--------------------------------
+  - Closed loop controller setup in DoInst Installation Center didn't work with
+    EDC applications for EDC5/25/60/120 and older 9133.6 (no graphik was drawn). Bug fixed.
+
+Version V 2.57   5.7.2007  HEG:
+--------------------------------
+  - Debugger API removed
+  - DoPERdModuleInfo reported incorrect text for EDC5/25. Bug fixed.
+  - New DoPE functions:
+    - DoPECurrentPID(Sync)
+    - DoPERdDriveInfo
+    - DoPEFMove_A
+  - DoPEDriveInfo structure defined
+  - DoPECurrentData delivered wrong data if called immediately after an initialization.
+    Now it returns DoPERR_NODATA while no samle data is availabe.
+  - New limit mode LIMIT_NOT_ACTIVE handled in DoPEPosExt... commands
+  - EDC220 and EDC580 redesign support implemented
+  - New definition for the DoPESetCheck... commands:
+    - ACTION_DRIVE_OFF
+    
+Version V 2.58   9.7.2007  HEG:
+-------------------------------
+  - Setup parameters removed from DoPEGeneralData:
+  	- SyncOption
+    - MachineName
+  - DoPEPortInfo reported wrong names for NIC's. Bug fixed by using DoDpx.dll V7.04.
+    
+Version V 2.59   18.1.08  HEG:
+------------------------------
+  - New DoPE functions:
+    - DoPESetCheckLimitIO
+    - DoPEOpenFunctionID
+    - DoPEOpenDeviceID
+    - DoPEOpenAll
+    - DoPECloseAll
+    - DoPEFeedForward(Sync)
+    - DoPEOptimizeFeedForward(Sync)
+    - DoPERdCtrlSensorDefHigh, DoPEWrCtrlSensorDefHigh(Sync)
+    - DoPERdIOSignals, DoPEWrIOSignals(Sync)
+    - DoPERdMainMenu, DoPEWrMainMenu(Sync)
+    - DoPERdCtrlParameter
+    - DoPEIOGripEnable(Sync)
+    - DoPEIOGripSet(Sync)
+    - DoPEIOGripPressure(Sync)
+    - DoPEIOExtEnable(Sync)
+    - DoPEIOExtSet(Sync)
+    - DoPEIOXHeadEnable(Sync)
+    - DoPEIOXHeadSet(Sync)
+    - DoPEIOHighPressureEnable(Sync)
+    - DoPEIOHighPressureSet(Sync)
+  - New Setup parameters in DoPECtrlSenDef:
+  	- SpeedFFP
+    - PosDelay
+    - AccFFP
+    - SpeedDelay
+  - New setup parameters:
+    - DoPECtrlSenDef for high pressure
+    - DoPEIOSignals
+      - DoPEIOGrip
+      - DoPEIOExt
+      - DoPEIOXHead
+      - DoPEIOHighPressure
+      - DoPEIOKey
+      - DoPEIOTest
+      - DoPEIOMisc
+    - DoPEMainMenu
+  - New setup parameters in DoPEOutChaDef:
+    - CurrentP/I/D
+  - OUTSIGNAL_DC_MOTOR and OUTSIGNAL_DC_LINEAR_MOTOR defined
+    (should be used instead of OUTSIGNAL_SIGN_MAGNITUDE and OUTSIGNAL_LOCKEDANTIPHASE)
+  - MAX_MACHINE changed from 4 to 8
+  - New connectors CON_X36A/B...CON_X39A/B defined
+  - New IO bit definitions implemented
+  - New main menu configuration definitions implemented
+  - NIC definitions can be removed by passing a NULL pointer to DoPEDefineNIC
+  - "pragma warning" eliminated for MinGW GNU Compiler
+  - New Event DoPEEVT_RESTART defined and included to DoPEEVT_ALL
+  - DoPEOFFLINE, DoPEONLINE and DoPERESTART defined for OnLine handler
+    line state.
+  - New Key and LED definitions:
+    - DoPE_KEY_HIGH_PRESSURE, DoPE_KEY_LOW_PRESSURE
+    - DoPE_LED_HIGH_PRESSURE, DoPE_LED_LOW_PRESSURE
+  - New cnstants  for 'LimitCtrl' in DoPESenDef defined:
+    - REACT_STATE
+    - REACT_DRIVE_OFF
+    - REACT_SHALT
+    
+Version V 2.60   31.01.08  HEG:
+-------------------------------
+  - DoPEEVT_ONLINE event was reported with every DoPEEVT if callback or post message
+    event handling was used. Bug fixed.
+  - DoPECtrlParameter extended:
+    - MinAcceleration, MaxAcceleration
+    - MinDeceleration, MaxDeceleration
+    - MinSpeed, MaxSpeed
+
+Version V 2.61   8.5.08  HEG:
+-----------------------------
+  - DoPERdSetupAll(Sync) and DoPEWrSetupAll(Sync) failed since DoPE version 2.59
+    if the application used a DoPEAPIVERSION less than 2.59. Bug fixed.
+  - New connector definitions CON_X21D,...,CON_X28D
+  - New CtrlState2 definition CTRL_CYCLES_ACTIVE
+
+Version V 2.62   28.7.08  HEG:
+------------------------------
+  - DoPE.h defined DoPEIOHighPressureSet without the lpusTan parameter. Bug fixed.
+  - Obsolete debug API function removed:
+    - DoPEGetDebugOutputFlags
+    - DoPEDebugOutputFlags
+    - DoPEDebugOutput
+    - DoPEDebugPrintf
+  - DoPEIOGrip redefined:
+    - OutChaNominalPressure changed to UnUsed1
+    - All pressure parameters changed form unit [Pa] to [%]
+  - DoPEIOHighPressure struct extensions implemented:
+    - PressureOutputEnabled
+    - OutChaNo
+    - OutChaLowPressure
+    - OutChaHighPressure
+    - OutChaRampTime
+  - DoPEIOExtSet declared the TAN parameter as unsigned pointer. Must be
+    unsigned short pointer. Bug fixed.
+
+Version V 2.63   16.19.08  HEG:
+-------------------------------
+  - DoPERdModuleInfo failed if Subsytem version was less than 10.13. Bug fixed.
+  - DoPEOpenAll crashed due to buffer overrun. Bug fixed.
+  - New DoPE function:
+    - DoPEDynCycles(Sync)
+  - New absolute sensor type definition SIG_POSITAL_SL_G
+  - Absolute sensor definition SIG_UNDEF removed.
+  - Typo in SIG_MTR_SSI_S2Bx102 removed. Must read SIG_MTS_SSI_S2Bx102. 
+
+Version V 2.64   3.2.09  HEG:
+-----------------------------
+  - Switched to VS2008
+  - DoPERR_OVFLOW bug due to signed/unsigned problems fixed:
+    - DoPEPosExt(_A)(Sync)  (Limit parameter)
+    - DoPEPosD1(_A)(Sync)   (Limit parameter)
+    - DoPEPosD2(_A)(Sync)   (Limit parameter)
+    - DoPECtrlError(Sync)   (Error parameter)
+    - DoPEDestWnd(Sync)     (WndSize parameter)
+
+Version V 2.65   10.6.09  HEG:
+------------------------------
+  - System message handler implemented
+  - wide character support implemented
+  - Display length constants defined:
+    - DSP_HEADLINE_LEN
+    - DSP_FKEYSLINE_LEN
+    - DSP_VALUE_LEN
+    - DSP_DIM_LEN
+  - Version text length constants defined:
+    - PEINTERFACE_LEN
+    - APPLICATION_LEN
+    - SUBSY_LEN
+    - SUBSYCUSTVER_LEN
+    - SUBSYCUSTNAME_LEN
+    - BIOS_LEN
+    - HWCTRL_LEN
+    - PEINTERFACEPC_LEN
+    - DPXVER_LEN
+    - SERIALNUMBER_LEN
+  - New type definitions:
+    - DoPEwVersion
+    - DoPEwModuleInfo
+    - DoPEwDriveInfo
+    - DoPE_wPORTINFO
+    - DoPEwOpenLinkInfo
+  - New DoPE functions:
+    - DoPESetOnSystemMsgHdlr
+    - DoPESetOnSystemMsgRtHdlr
+    - DoPEwDspHeadLine(Sync)
+    - DoPEwDspFKeys(Sync)
+    - DoPEwDspMValue(Sync)
+    - DoPEwRdVersion
+    - DoPEwRdModuleInfo
+    - DoPEwRdDriveInfo
+    - DoPEwRdLanguageInfo
+    - DoPEwPortInfo
+    - DoPEwOpenAll
+    - DoPEwCloseAll
+    - DoPEShieldEnable(Sync)
+  - DoPESynchronizeData checks for common SpeedCtrlTime of all synchronized links
+  - New IO Grip Mode definitions:
+    - IO_GRIP_MODE_0_OFF
+    - IO_GRIP_MODE_1_TANSPARENT
+    - IO_GRIP_MODE_2_LIMIT_CTRL
+  - Language definitions redefined:
+    - LANGUAGE_SPANISH -> LANGUAGE_USER1
+    - LANGUAGE_FRENCH  -> LANGUAGE_USER2
+  - LANGINFO_NAME_LEN and struct DoPEwLanguageInfo defined
+  - SYSTEM_MSG_LANGUAGE_READ, SYSTEM_MSG_LANGUAGE_VERSION and SYSTEM_MSG_LANGUAGE_SYNTAX defined
+  - Machine normalization sets conversion values of measuring and output channels
+    to zero while channels are not initialized.
+  - DoPESelSetup and DoPEInitialized didn't report errors of the machine normalization
+    initialization. Bug fixed.
+  - Negative limits were not handled correctly. Bug fixed.
+    - DoPEPosExt(_A)(Sync)
+    - DoPEPosD1(_A)(Sync)
+    - DoPEPosD2(_A)(Sync)
+  - Setup scale wasn't considered with IO grip LimitMax and LimitMin. Bug fixed.
+  - New DoPEDynCycles definitions for SweepFrequencyMode and SweepAmplitudeMode:
+    - DYN_SWEEP_LINEAR_START_END
+    - DYN_SWEEP_LOGARITHMIC_START_END
+
+Version V 2.66   7.12.09  HEG:
+------------------------------
+  - DoPEwRdVersion initializes DoPEwVersion structure with zero.
+  - DoPEwRdModuleInfo initializes DoPEwModuleInfo structure with zero.
+  - DoPEwRdDriveInfo initializes DoPEwDriveInfo structure with zero.
+  - DoPEwOpenAll initializes DoPEwOpenLinkInfo info array zero.
+  - DoPEwOpenAll parameter check implemented.
+  - DoPEwPortInfo initializes DoPE_wPORTINFO structure with zero.
+  - New KEY and LED definitions:
+   - DoPE_KEY_OFF, DoPE_KEY_FAST, DoPE_KEY_TEST_STOP, DoPE_KEY_TEST_RETURN, DoPE_KEY_TEST_HALT_CONTINUE, DoPE_KEY_CONNECT
+   - DoPE_LED_OFF, DoPE_LED_FAST, DoPE_LED_TEST_STOP, DoPE_LED_TEST_RETURN, DoPE_LED_TEST_HALT_CONTINUE, DoPE_LED_CONNECT
+  - Unhandled events led to spurious SensorMsg events. Bug fixed.
+  - New DoPEMc2Output 'Mode' definition:
+    - MC2OUT_BURST
+  - New absolute value sensor type definitions:
+    - SIG_POSITAL_SL_G renamed to SIG_POSITAL_SL_G_24
+    - SIG_POSITAL_SL_G_16 4
+    - SIG_ROQ_425
+    - SIG_SSI_GENERIC, SIG_SSI_CODE, SIG_SSI_LEN, SIG_SSI_LEN_OFFS
+  - New DoPE functions:
+    - DoPESetSsiGenericSignalType
+    - DoPESsiGenericSignalTypeInfo
+    - DoPESetSerialSensorTransparent(Sync)
+    - DoPESetSensorDataTransmissionRate(Sync)
+  - DoPEShieldEnableSync failed in Callback due to a communication deadlock.
+    Bug fixed.
+  - Extend the V2.xx PE-API compatible versions to V2.xx up to V9.xx 
+  - DoPESetSerialSensor(Sync): added missing parameters to the debug output.
+  - Internaly poll DoPE events every 100ms to solve event handler problem with
+    VB.NET drag and drop handling.
+  - DoPE Internal windows message numbers used for event handlers changed from
+    WM_USER range to WM_APP range. Message numbers 0xBFFF and 0xBFFE must not
+    be used by DoPE users.
+  - Reinitialization of 'synchronize data' with DoPESynchronizeData after a
+    'synchronize data' termination (with DoPECloseLink, DoPESelSetup or
+    DoPEInitialize) led to an 'access violation'. Bug fixed.
+  - Cleanup at 'synchronize data' termination (e.g. at DoPECloseLink, DoPESelSetup
+    or DoPEInitialize) improved. Memory leaks fixed.
+  - DoPE handle check for event handlers improved (by structured exception handling).
+    
+Version V 2.67  13.4.10  HEG:
+-----------------------------
+  - New DoPE functions:
+    - DoPESetOnSynchronizeDataOverflowHdlr
+    - DoPESetOnSynchronizeDataOverflowRtHdlr
+  - Debug output for synchronize data API implemented.
+  - DoPEOptimizeFeedForwardSync didn't work as a Sync command. Bug fixed.
+  - Pointer arithmetic in DoPEGetCurrentData and DoPESetBasicTare removed.
+  - 'Data overflow' debug message removed.
+  - Closed loop test values (Command) normalization was reduced due to type casts.
+    Bug fixed.
+  - Event handler mechanism modified:
+    - Static buffer allocation implemented.
+    - Reinstallation of event handlers was bogus. Bug fixed.
+    - Event handlers and old style 'callback' or 'window message' method can't
+      be used simultaneously for the same event.
+    - OnData handler flushes old style circular data buffer
+     (DoPEGedData reports DoPERR_NODATA if OnData handler is installed).
+    - Interthread synchronization simplified.
+    - Link specific events and synchronize data events sent to the same queue.
+      This leads to a serialization of the events (sorted by time).
+    
+Version V 2.68  3.8.10  HEG:
+----------------------------
+  - Uninstalling OnSynchronizeDataOverflow handler by passing a NULL pointer to
+    DoPESetOnSynchronizeDataOverflowHdlr led to an access violation. Bug fixed.
+  - DoPEOpenAll and DoPEOpenFunctionID led to blue screen on 'slow' PC's. Bug fixed.
+  - DoPEKeyGet didn't clear handled bits in key matrix. Bug fixed.
+  - DoPEOn and DoPEOff functions are using the new PS_DRIVE_ON and PS_DRIVE_OFF sub commands.
+  - New DoPE functions:
+    - DoPERdRmcDef
+    - DoPEWrRmcDef(Sync)
+  - New setup parameters:
+    - in DoPEOutChaDef:
+      - DoPEMc2OutputDef
+    - in DoPEMachineDef:
+      - ShieldUprLock
+      - ShieldLwrLock
+      - ShieldSpeedLimit
+      - LimitSwitchType
+      - XheadInitialMode
+      - XheadInitialValue
+      - X4Pin14Mode
+    - in DoPEIOSignals
+      - DoPEIOSHalt
+      - DoPEIOKey and DoPEIOTest removed
+    - in DoPESetup:
+      - DoPERmcDef
+        - PushMode
+        - DoPERmcDPoti
+        - DoPERmcIOKey
+  - New definition for max. number of DoPERmcIOKey definitions:
+    - RMCIO_KEY_MAX 16
+  - New definitions for DoPEMachineDef LimitSwitchType:
+    - LIMIT_SWITCH_TYPE_SINGLE
+    - LIMIT_SWITCH_TYPE_UPPER_LOWER
+  - New definitions for DoPEMachineDef XHeadInitialMode:
+    - XHEAD_INITIAL_MODE_AUTOMATIC
+    - XHEAD_INITIAL_MODE_MANUAL
+  - New definitions for DoPEMachineDef X4Pin14Mode:
+    - X4PIN14_MODE_BYPASS
+    - X4PIN14_MODE_EDC_READY
+  - New IO Grip Mode definition:
+    - IO_GRIP_MODE_3_LIMIT_CTRL_INVERTED
+  - New system message definitions:
+    - SYSTEM_MSG_OC_MC2OUTPUT
+    - SYSTEM_MSG_IO_MISC_TEMPERATURE1
+    - SYSTEM_MSG_IO_MISC_TEMPERATURE2
+    - SYSTEM_MSG_IO_MISC_OIL_LEVEL
+    - SYSTEM_MSG_IO_MISC_OIL_FILTER
+    - SYSTEM_MSG_IO_MISC_POWER_FAIL
+    - SYSTEM_MSG_IO_SHALT_MODE
+    - SYSTEM_MSG_IO_SHALT_BIN
+  - Obsolete system messages removed:
+    - SYSTEM_MSG_IO_KEY_MODE
+    - SYSTEM_MSG_IO_KEY_BIN
+    - SYSTEM_MSG_IO_KEY_BOUT
+    - SYSTEM_MSG_IO_TEST_MODE
+    - SYSTEM_MSG_IO_TEST_BIN
+    - SYSTEM_MSG_IO_TEST_BOUT
+  - New InSignals and OutSignals definitions:
+    - IN_SIG_IO_SHALT_UPPER
+    - IN_SIG_IO_SHALT_LOWER
+    - O_SIG_EDC_READY
+    
+Version V 2.69  18.11.10  HEG:
+------------------------------
+  - DoPEOptimizeFeedForward(Sync) didn't pass a TAN. Bug fixed.
+  - E5MB_2 and E5MB_3 support implemented
+    
+Version V 2.70  29.07.11  HEG:
+------------------------------
+  - New DoPE functions:
+    - DoPECurrentPortInfo, DoPEwCurrentPortInfo
+    - DoPERmcEnable, DoPERmcReDefine, DoPERmcKeys, DoPERmcState
+    - DoPESetOnRmcEventHdlr, DoPESetOnRmcEventRtHdlr
+  - DoPE.h header file split into several small headers
+  - HostSpeed and SubSpeed functions accept negative speed arguments
+  - DoPEOpenAll(w), DoPEOpenDeviceID and DoPEOpenFunctionID:
+    - API version check implemented
+  - New KEY and LED definitions:
+    - DoPE_KEY_CTRL_POS, DoPE_KEY_CTRL_LOAD, DoPE_KEY_CTRL_EXTENSION
+    - DoPE_LED_CTRL_POS, DoPE_LED_CTRL_LOAD, DoPE_LED_CTRL_EXTENSION
+  - DoPERdDriveInfo report drive info for DC16P and DC32P
+  - DoPESsiGenericSignalTypeInfo code bugfix
+    - for GrayCode code was set to SIG_SSI_CODE (0x40) and not to 1
+  - DoPEWrBitInDef(Sync) corrupted callers StopLevel. Bug fixed.
+  - LineState RESTART bug fixed
+  - Machine normalization didn't work for calculated sensors.
+    Encoder x-head ratio wasn't considered. Bug fixed.
+
+Version V 2.71  30.11.11  HEG:
+------------------------------
+  - strict API check implemented
+  - i1MB, i3MB, i8MB, iINCR and iIO support implemented
+  - New DopE functions:
+    - DoPERdPosPID, DoPEWrPosPID(Sync)           ( requires PE-Version 2.71 ! )
+    - DoPERdSpeedPID, DoPEWrSpeedPID(Sync)       ( requires PE-Version 2.71 ! )
+    - DoPERdFeedForward, DoPEWrFeedForward(Sync) ( requires PE-Version 2.71 ! )
+    - DoPEPcCmdFromFile
+    - DoPESetOnIoSHaltMsgHdlr, DoPESetOnIoSHaltMsgRtHdlr
+    - DoPESetStiffnessCorrection(Sync)
+
+Version V 2.72  30.1.12  HEG:
+-----------------------------
+  - DoPEWrSetupAll(Sync) didn't report all errors. Bug fixed.
+  - DoPEWrMachineDef(Sync) failed with DoPERR_MSGSIZE if EDC firmware was older than Jun. 2002. Bug fixed.
+  - New IN_SIGNAL definition IN_SIG_CPU_EMERGENCY_OFF.
+
+Version V 2.73  12.7.12  HEG:
+------------------------------
+  - 16 control channels supported
+    - MAX_CTRL changed to 16
+    - CTRL_SENSOR_3 to CTRL_SENSOR_15 defined
+    - measuring data record modified
+      - ActiveCtrl indicates the active control channel     (Bit0=Position Control ... Bit15=Sensor15 Control)
+      - UpperSft/LowerSft indicates 'Range limit exceeded'           (Bit0=Position Sensor ... Bit15=Sensor15)
+      - SensorConnected indicates the connected sensor plugs         (Bit0=Position Sensor ... Bit15=Sensor15)
+      - SensorKeyPressed indicates the active sensor plugs key state (Bit0=Position Sensor ... Bit15=Sensor15)
+  - New KEY and LED definitions:
+    - DoPE_KEY_CTRL_SENSOR3 ... DoPE_KEY_CTRL_SENSOR15
+    - DoPE_LED_CTRL_SENSOR3 ... DoPE_LED_CTRL_SENSOR15
+  - New runtime error for controller deviation error:
+    - RTE_CTRL_DEVIATION (Device contains the control channel)
+    - RTE_ERROR_S, RTE_ERROR_F, RTE_ERROR_D removed
+  - New DigiPoti sensor definition SENSOR_DP.
+    The DigiPoti (Connector X63A) can be defined at any sensor position in the setup.
+    SENSOR_DP can be used in the DoPEFDPoti(Sync) and DoPEIntgr(Sync) commands.
+  - New system message:
+    - SYSTEM_MSG_OC_MC2OUTPUT_MODE
+  - New DoPE function:
+    - DoPEIgnoreTcpIpNIC
+  - Mc2Output(sync) definition by up to three points
+    - New MC2OUT_MODE... and MC2OUT_PRIORITY... definitions
+    - DoPEMc2Output command parameters adjusted
+    - DoPEMc2OutputDef setup structure adjusted
+  - DoPEPcCmdFromFile Offset/Scale handling modified
+    (new formula: value = filevalue * scale - offset)
+  - BaudRate parameter added to DoPE_PORTINFO struct.
+  - ComPort parameter of DoPE_PORTINFO struct contains Port ID for USB and LAN now.
+  - DoPERdModuleInfo reported wrong error code for EDC5/25. Bug fixed.
+  - Some DoPE functions didn't return TAN. Bug fixed.
+    - DoPEHaltSync, DoPEHaltWSync, DoPEHaltW_ASync, DoPESHaltSync
+    - DoPEDynCycleSync
+    - DoPEPosExtSync, DoPEPosExt_ASync
+    - DoPEShieldLimitSync
+    - DoPEOffSync
+
+Version V 2.74  27.9.12  HEG:
+-----------------------------
+  - New DoPE functions:
+    - DoPESetSensorCorrection(Sync)
+  - New System Messages:
+    - SYSTEM_MSG_MAX_RESULT_FILES
+    - SYSTEM_MSG_SEN_SCALE
+  - Closed Loop Controller normalization failed due to numerical problems. Bug fixed.
+  - DoPEFDpoti(Sync) reports DoPERR_PARAMETER if no DPoti is present.
+  - RMC handler crashed with systems without DPoti definition. Bug fixed.
+
+Version V 2.75  10.1.13  HEG:
+-----------------------------
+  - DoPEMc2Output(Sync) failed with old EDC (PE_INTERFACE < 2.73). Bug fixed.
+  
+Version V 2.76  26.7.13  HEG:
+-----------------------------
+  - Windows Typedefs added to PEDEF.H
+  - New DoPE function:
+    - DoPEWrSensorHeaderData
+  - ActiveCtrl, UpperSft and LowerSft emulation for old firmware implemented.
+  - New definitions for calculated sensors:
+    - MAX_CALCULATED_CHANNELS
+    - F_S1PlusS2_half, F_S1MinusS2, F_S1PlusS2PlusS3_third, F_S1PlusS2PlusS3
+      F_S1PlusS2, F_StiffnessCorrection, F_SensorCorrection, F_ExtendedFormula,
+      F_S1PlusS2PlusS3PlusS4_quarter, F_S1PlusS2PlusS3PlusS4
+  - Internal timeout for DoPEOpen... functions increased to 7.5s (was 5s)
+  - DoPEDynCycles(Sync)
+    - calculation of BimodalScale modified to avoid DoPERR_ZERODIV
+
+Version V 2.77  19.9.13  HEG:
+-----------------------------
+  - New DoPE functions and constants:
+    - DoPESetOnDebugMsgHdlr, DoPESetOnDebugMsgRtHdlr, DEBUG_MSG, DEBUG_MSG_DATA
+    - DoPEDebugMsgEnable(Sync)
+    - DoPESendDebugCommand(Sync)
+  - NEW Modes for DynCycle Command:
+    - DYN_WAVEFORM_SAW_TOOTH, DYN_WAVEFORM_SAW_TOOTH_INV, DYN_WAVEFORM_PULSE
+  - New Constant for 'OutSignals':
+    - O_SIG_DRIVE_OFF
+  - New  parameters in DoPESumSenInfo:
+    - Tare
+    - UserScale
+    - McIntegr
+    - CtrlIntegr
+    - HwDelayTime
+    - McDelayTime
+    - McDelayTimeCorr
+  - DoPEWrSetupAll(Sync) and DoPEWrOutChannelDef(Sync) failed with DoPE error
+    'Message to Long' on devices with DPX version less 2 (EDC5, EDC100, EDC120). Bug fixed.
+
+Version V 2.78  7.3.14  HEG:
+----------------------------
+  - reserved
+
+Version V 2.79  26.3.14  HEG:
+-----------------------------
+  - New DoPE functions:
+    - DoPEPcCmd
+    - DoPEPcCmdInfo
+    - DoPEDeadbandCtrl(Sync)
+  - DoPECtrlParameter extended:
+    - Deadband
+    - PercentP
+ - New OffsetCtrl parameter in DoPEPcCmdFormFile. (Requires EdcApp 9040.008 or higer)
+  - Missing DoPE error definition DoPERR_CMD_NIM implemented
+
+Version V 2.80  31.10.14  HEG:
+------------------------------
+  - DoPESetTime with new Mode parameter. Time can be set immedeately, on the start of a
+    movement command or at the start of the first cycle of a cyclic command.
+  - New DoPE functions:
+    - DoPESetCycleMode
+    - DoPESetOnDataBlockHdlr, DoPESetOnDataBlockRtHdlr
+    - DoPESetOnDataBlockSize, DoPEGetOnDataBlockSize
+
+Version V 2.81  19.11.14  HEG:
+------------------------------
+  - automatic OnDataBlock event cleanup at DoPECloseLink implemented
+
+Version V 2.82  25.8.15  HEG:
+-----------------------------
+  - machine normalization keeps initializing after errors and reports the first error
+    that occured.
+  - New DoPE functions:
+    - DoPESetNominalAccSpeed(Sync)
+  - DoPERdCtrlParameter reported wrong values for
+    MinAcceleration, MaxAcceleration, MinDeceleration, MaxDeceleration, MinSpeed, MaxSpeed
+    in combination with Subsy V12.13 or higher. Bug fixed. 
+  - DoPEPcCmd and DoPEPcCmdFromFile didn't work for connections opened with less than 32
+    transmit buffers. Bug fixed.
+  - DoPE_KEY_LINK and DoPE_LED_LINK defined   
+
+Version V 2.83  17.6.16  HEG:
+-----------------------------
+  - DoPEOpen... functions report DoPERR_VERSION if a EDCi is detected
+
+Version V 2.84  29.7.16  HEG:
+-----------------------------
+  - New DoPE functions:
+    - DoPEReInitialize
+    - DoPEReInitializeEnable
+
+Version V 2.85  13.06.17  HEG:
+------------------------------
+  - Sensor definition Scale of an absolute sensor is set to the signal period of
+    the sensor now (was 0.0 before).
+  - DoPEOpenAll, DoPEOpenDeviceID and DoPEOpenFunctionID are polling available
+    links in a loop (no multiple threads).
+    They report:
+    - DoPERR_NOERROR on success
+    - DoPERR_VERSION if no link has been established and an EDCi was detected
+    - DoPERR_TIMEOUT if no link has been established
+
+Version V 2.86   27.10.2017  HEG:
+---------------------------------
+  - New Serial Sensor modbus temperature controllers definitions
+    - SERSEN_MODBUS_EUROTHERM
+    - SERSEN_MODBUS_GRADO
+    - SERSEN_MODBUS_SHIMANDEN
+    - SERSEN_MODBUS_AZBIL
+  - Opening EDCi links caused an Offline display on the RMCi. Bug fixed.
+
+Version V 2.87   2.11.2017  HEG:
+--------------------------------
+  - DoPEOpenAll failed. Bug fixed.
+
+Version V 2.88   25.6.2018  HEG:
+--------------------------------
+  - DoPEReInitialize reported DoPERR_PARAMETER due to wrong CRC calculation. Bug fixed.
+  
+Version V 2.89   23.8.2018  HEG
+-------------------------------
+  - Delphi DoPEError and DoPEState record declarations were to short. Bug fixed.
+  - OnDataBlock realtime Handler stopped reporting data. Bug fixed.
+
+Version V 2.90   11.10.2019  HEG
+--------------------------------
+  - typo in DoPEREINITIALIZEDATA_LEN removed
+  - missing Controll Message IDs defined
+    - CMSG_IO_SHALT_UPPER
+    - CMSG_IO_SHALT_LOWER
+  - internal synchronize data buffer increased to 0x1000
+  - Pascal demo built with Lazarus Open Pascal IDE
+
+Version V 2.91   17.02.2019  HEG
+--------------------------------
+  - DoPESft didn't set the correct values in the sensor info if an DoPERR_CMD_PARCORR error occured. Bug fixed.

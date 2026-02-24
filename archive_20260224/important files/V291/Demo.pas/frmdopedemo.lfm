@@ -1,0 +1,277 @@
+object frmDoPEDemo: TfrmDoPEDemo
+  Left = 256
+  Height = 408
+  Top = 145
+  Width = 674
+  Caption = 'Pascal DoPE-Demo V%x.%02x'
+  ClientHeight = 408
+  ClientWidth = 674
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
+  LCLVersion = '2.0.4.0'
+  object Label1: TLabel
+    Left = 66
+    Height = 13
+    Top = 5
+    Width = 46
+    Caption = 'Time [s]'
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 217
+    Height = 13
+    Top = 5
+    Width = 76
+    Caption = 'Position [mm]'
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 396
+    Height = 13
+    Top = 5
+    Width = 50
+    Caption = 'Load [N]'
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label4: TLabel
+    Left = 544
+    Height = 13
+    Top = 5
+    Width = 86
+    Caption = 'Extension [mm]'
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label5: TLabel
+    Left = 232
+    Height = 15
+    Top = 68
+    Width = 40
+    Caption = 'Control'
+    ParentColor = False
+  end
+  object Label6: TLabel
+    Left = 232
+    Height = 15
+    Top = 95
+    Width = 32
+    Caption = 'Speed'
+    ParentColor = False
+  end
+  object Label7: TLabel
+    Left = 232
+    Height = 15
+    Top = 122
+    Width = 60
+    Caption = 'Destination'
+    ParentColor = False
+  end
+  object lbl_SpeedDim: TLabel
+    Left = 441
+    Height = 15
+    Top = 95
+    Width = 32
+    Caption = 'mm/s'
+    ParentColor = False
+  end
+  object lbl_DestDim: TLabel
+    Left = 441
+    Height = 15
+    Top = 122
+    Width = 22
+    Caption = 'mm'
+    ParentColor = False
+  end
+  object txt_Ext: TStaticText
+    Left = 507
+    Height = 26
+    Top = 24
+    Width = 160
+    Alignment = taCenter
+    BorderStyle = sbsSunken
+    Caption = '0.000'
+    Color = clBlack
+    Font.Color = clLime
+    Font.Height = -19
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ParentColor = False
+    TabOrder = 0
+  end
+  object txt_Time: TStaticText
+    Left = 9
+    Height = 26
+    Top = 24
+    Width = 160
+    Alignment = taCenter
+    BorderStyle = sbsSunken
+    Caption = '0.000'
+    Color = clBlack
+    Font.Color = clLime
+    Font.Height = -19
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ParentColor = False
+    TabOrder = 1
+  end
+  object txt_Pos: TStaticText
+    Left = 175
+    Height = 26
+    Top = 24
+    Width = 160
+    Alignment = taCenter
+    BorderStyle = sbsSunken
+    Caption = '0.000'
+    Color = clBlack
+    Font.Color = clLime
+    Font.Height = -19
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ParentColor = False
+    TabOrder = 2
+  end
+  object txt_Load: TStaticText
+    Left = 341
+    Height = 26
+    Top = 24
+    Width = 160
+    Alignment = taCenter
+    BorderStyle = sbsSunken
+    Caption = '0.000'
+    Color = clBlack
+    Font.Color = clLime
+    Font.Height = -19
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ParentColor = False
+    TabOrder = 3
+  end
+  object Memo1: TMemo
+    Left = 9
+    Height = 225
+    Top = 176
+    Width = 656
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Courier New'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ReadOnly = True
+    ScrollBars = ssBoth
+    TabOrder = 4
+    TabStop = False
+    WordWrap = False
+  end
+  object cbo_Ctrl: TComboBox
+    Left = 312
+    Height = 23
+    Top = 64
+    Width = 121
+    ItemHeight = 15
+    ItemIndex = 0
+    Items.Strings = (
+      'Position'
+      'Load'
+      'Extension'
+    )
+    OnChange = cbo_CtrlChange
+    Style = csDropDownList
+    TabOrder = 5
+    Text = 'Position'
+  end
+  object txt_Speed: TEdit
+    Left = 312
+    Height = 23
+    Top = 91
+    Width = 121
+    TabOrder = 6
+    Text = '0'
+  end
+  object txt_Dest: TEdit
+    Left = 312
+    Height = 23
+    Top = 118
+    Width = 121
+    TabOrder = 7
+    Text = '0'
+  end
+  object btn_On: TButton
+    Left = 8
+    Height = 35
+    Top = 63
+    Width = 40
+    Caption = 'On'
+    OnClick = btn_OnClick
+    TabOrder = 8
+  end
+  object btn_Off: TButton
+    Left = 8
+    Height = 35
+    Top = 97
+    Width = 40
+    Caption = 'Off'
+    OnClick = btn_OffClick
+    TabOrder = 9
+  end
+  object btn_Up: TButton
+    Left = 64
+    Height = 35
+    Top = 63
+    Width = 40
+    Caption = 'Up'
+    OnClick = btn_UpClick
+    TabOrder = 10
+  end
+  object btn_Halt: TButton
+    Left = 65
+    Height = 35
+    Top = 97
+    Width = 40
+    Caption = 'Halt'
+    OnClick = btn_HaltClick
+    TabOrder = 11
+  end
+  object btn_Down: TButton
+    Left = 65
+    Height = 35
+    Top = 131
+    Width = 40
+    Caption = 'Down'
+    OnClick = btn_DownClick
+    TabOrder = 12
+  end
+  object btn_Pos: TButton
+    Left = 175
+    Height = 35
+    Top = 63
+    Width = 40
+    Caption = 'Pos'
+    OnClick = btn_PosClick
+    TabOrder = 13
+  end
+end
