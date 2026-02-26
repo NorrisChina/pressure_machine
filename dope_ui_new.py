@@ -44,6 +44,9 @@ Handover
 See the handover document generated for this component for setup, workflows,
 and troubleshooting guidance.
 """
+
+from __future__ import annotations
+
 import sys
 import os
 import subprocess
@@ -53,21 +56,94 @@ import threading
 import time
 import json
 import faulthandler
+import argparse
 from pathlib import Path
 from datetime import datetime
 from PyQt5 import QtWidgets, QtCore
 
-DLL_PATH = Path(__file__).parent / "drivers" / "DoPE.dll"
+def _app_base_dir() -> Path:
+    """Return the directory used for runtime file IO.
+
+    - Normal script run: repo root (this file's directory)
+    - PyInstaller frozen build: directory containing the executable
+    """
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+APP_DIR = _app_base_dir()
+DLL_PATH = APP_DIR / "drivers" / "DoPE.dll"
+
+
+def _parse_com_port(value: str) -> int:
+    v = str(value).strip()
+    if not v:
+        raise ValueError("empty port")
+    if v.upper().startswith("COM"):
+        v = v[3:]
+    return int(v)
+
+
+def _startup_connection_params(argv: list[str]) -> tuple[int, int, int]:
+    """Resolve connection parameters for DoPEOpenLink.
+
+    Priority:
+    1) CLI args: --port / --baud / --api
+    2) Environment: DOPE_PORT / DOPE_BAUD / DOPE_API
+    3) Defaults: port=7 baud=9600 api=0x0289
+    """
+    default_port = 3
+    default_baud = 9600
+    default_api = 0x0289
+
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("--port", type=str, default=None)
+    ap.add_argument("--baud", type=int, default=None)
+    ap.add_argument("--api", type=str, default=None)
+
+    try:
+        ns, _ = ap.parse_known_args(argv)
+    except Exception:
+        ns = argparse.Namespace(port=None, baud=None, api=None)
+
+    port_raw = ns.port or os.environ.get("DOPE_PORT")
+    baud_raw = ns.baud or os.environ.get("DOPE_BAUD")
+    api_raw = ns.api or os.environ.get("DOPE_API")
+
+    port = default_port
+    if port_raw is not None:
+        try:
+            port = _parse_com_port(str(port_raw))
+        except Exception:
+            port = default_port
+
+    baud = default_baud
+    if baud_raw is not None:
+        try:
+            baud = int(baud_raw)
+        except Exception:
+            baud = default_baud
+
+    api = default_api
+    if api_raw is not None:
+        try:
+            api = int(str(api_raw), 0)
+        except Exception:
+            api = default_api
+
+    return int(port), int(baud), int(api)
 
 # Capture fatal crashes (e.g. access violation from ctypes/DLL) to a log file.
 try:
-    _fh_path = Path(__file__).with_name("dope_ui_new_faulthandler.log")
+    _fh_path = APP_DIR / "dope_ui_new_faulthandler.log"
     faulthandler.enable(open(_fh_path, "a", buffering=1), all_threads=True)
 except Exception:
     pass
 
 # Prefer 32-bit Python for the 32-bit DoPE.dll.
-if sys.maxsize > 2**32:
+# When running as a PyInstaller-frozen EXE, do not attempt any Python relaunch.
+if (not getattr(sys, "frozen", False)) and sys.maxsize > 2**32:
     venv32_python = os.path.join(os.path.dirname(__file__), ".venv32", "Scripts", "python.exe")
     if os.path.exists(venv32_python):
         subprocess.call([venv32_python, __file__] + sys.argv[1:])
@@ -246,10 +322,24 @@ class DopeUINew(QtWidgets.QWidget):
         self._dpot_speed_last_log_ts = 0.0
         self._sensor_d_history: list[float] = []
 
+        # Connection parameters (overridable via CLI/env)
+        self._conn_port, self._conn_baud, self._conn_api = _startup_connection_params(sys.argv[1:])
+
         self.init_ui()
         self.sig_log.connect(self.log)
         self.sig_data.connect(self._update_labels)
-        ok = self.init_dope()
+        try:
+            ok = self.init_dope()
+        except Exception as e:
+            ok = False
+            try:
+                self.log(f"[init] init_dope crashed: {e}")
+            except Exception:
+                pass
+            try:
+                QtWidgets.QMessageBox.critical(self, "Initialization failed", f"init_dope crashed:\n{e}")
+            except Exception:
+                pass
         self._running = bool(ok)
         if ok:
             self._thread = threading.Thread(target=self.update_data_loop, daemon=True)
@@ -642,7 +732,7 @@ class DopeUINew(QtWidgets.QWidget):
     def log(self, message):
         """Append a timestamped log line to the UI and to a local file.
 
-        Log file location: `dope_ui_new.log` next to this script.
+        Log file location: `dope_ui_new.log` next to this script/exe.
         """
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -651,7 +741,7 @@ class DopeUINew(QtWidgets.QWidget):
         self.log_text.verticalScrollBar().setValue(self.log_text.verticalScrollBar().maximum())
         # Write to local log file
         try:
-            log_path = Path(__file__).parent / "dope_ui_new.log"
+            log_path = APP_DIR / "dope_ui_new.log"
             with open(log_path, "a", encoding="utf-8") as f:
                 f.write(log_line + "\n")
         except Exception as e:
@@ -705,12 +795,14 @@ class DopeUINew(QtWidgets.QWidget):
             ctypes.c_ushort, ctypes.c_ushort, ctypes.c_void_p, ctypes.POINTER(ctypes.c_ulong)
         ]
         self.do_ctrl.DoPEOpenLink.restype = ctypes.c_ulong
+        self.log(f"[init] DoPEOpenLink params: port={self._conn_port} (COM{self._conn_port}), baud={self._conn_baud}, api=0x{int(self._conn_api):04x}")
         with self._dll_lock:
-            err = self.do_ctrl.DoPEOpenLink(7, 9600, 10, 10, 10, 0x0289, None, ctypes.byref(self.hdl))
+            err = self.do_ctrl.DoPEOpenLink(self._conn_port, self._conn_baud, 10, 10, 10, int(self._conn_api), None, ctypes.byref(self.hdl))
         self.log(f"[init] DoPEOpenLink returned: 0x{err:04x}, hdl={self.hdl.value}")
         if err != 0x0000:
             self.log(f"OpenLink failed: 0x{err:04x}")
-            QtWidgets.QMessageBox.critical(self, "Connection failed", f"OpenLink failed: 0x{err:04x}")
+            hint = "\n\nHint: 0x800B usually means device not present / no response. Check power, cable, correct COM port, and that no other program is using the port."
+            QtWidgets.QMessageBox.critical(self, "Connection failed", f"OpenLink failed: 0x{err:04x}{hint}")
             self.hdl = ctypes.c_ulong(0)
             return False
         self.log("Connected")
@@ -1336,7 +1428,7 @@ class DopeUINew(QtWidgets.QWidget):
     def _open_cycle_log(self) -> None:
         """Open a CSV file to record target cycle data."""
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        out_dir = Path(__file__).parent / "temp"
+        out_dir = APP_DIR / "temp"
         out_dir.mkdir(parents=True, exist_ok=True)
         self._cycle_log_path = out_dir / f"target_cycles_{ts}.csv"
         self._cycle_log_fp = self._cycle_log_path.open("w", newline="", encoding="utf-8")
@@ -1614,8 +1706,8 @@ class DopeUINew(QtWidgets.QWidget):
             freq_hz = 2.0
 
         # Launch 64-bit helper if available
-        helper = Path(__file__).parent / "temp" / "keithley_2700_stream.py"
-        py64 = Path(__file__).parent / ".venv" / "Scripts" / "python.exe"
+        helper = APP_DIR / "temp" / "keithley_2700_stream.py"
+        py64 = APP_DIR / ".venv" / "Scripts" / "python.exe"
         if py64.exists() and helper.exists():
             args = [
                 str(py64),
@@ -1752,7 +1844,7 @@ class DopeUINew(QtWidgets.QWidget):
     def _open_keithley_log(self, channels: list[int]) -> None:
         """Open Keithley CSV log file under `temp/`."""
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        out_dir = Path(__file__).parent / "temp"
+        out_dir = APP_DIR / "temp"
         out_dir.mkdir(parents=True, exist_ok=True)
         self._kei_log_path = out_dir / f"keithley_{ts}.csv"
         self._kei_log_fp = self._kei_log_path.open("w", newline="", encoding="utf-8")
@@ -2293,6 +2385,27 @@ class DopeUINew(QtWidgets.QWidget):
         event.accept()
 
 if __name__ == "__main__":
+    # Optional CLI self-tests for field debugging (do not start the UI).
+    # Example: dope_ui_new.exe --keithley-import-test
+    try:
+        ap = argparse.ArgumentParser(add_help=True)
+        ap.add_argument("--keithley-import-test", action="store_true")
+        ns, _ = ap.parse_known_args(sys.argv[1:])
+        if bool(getattr(ns, "keithley_import_test", False)):
+            try:
+                import pyvisa  # type: ignore
+
+                print(f"OK: pyvisa importable (version={getattr(pyvisa, '__version__', '?')})")
+                raise SystemExit(0)
+            except Exception as e:
+                print(f"ERROR: pyvisa import failed: {e}")
+                raise SystemExit(2)
+    except SystemExit:
+        raise
+    except Exception:
+        # Never block the UI from starting due to self-test argument parsing.
+        pass
+
     app = QtWidgets.QApplication(sys.argv)
     panel = DopeUINew()
     panel.show()

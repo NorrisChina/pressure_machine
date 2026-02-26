@@ -1,0 +1,8 @@
+# Minimal runtime dependencies for dope_ui_new.py
+#
+# Notes:
+# - DoPE.dll is 32-bit, so the UI must run on 32-bit Python.
+# - `pyvisa` is only needed if you enable Keithley logging; UI-only can install just PyQt5.
+
+PyQt5
+pyvisa
